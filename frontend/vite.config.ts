@@ -7,6 +7,8 @@ export default defineConfig({
     build: {
         rollupOptions: {
             input: {
+                // Multiple indexing to help with
+                // static hosting
                 main: 'index.html',
                 // login: 'login/index.html',
             },
