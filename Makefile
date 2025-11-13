@@ -9,7 +9,7 @@ breadport:
 frontend:
 	cd frontend; npm run build
 
-build: main
+build: main frontend
 
 run: build
 	./main
