@@ -1,4 +1,10 @@
+import { useEffect } from "react";
+
 function Login() {
+
+    useEffect(() => {
+        document.title = "Saloon PADA - Home Page";
+    }, []);
 
     return (
         <>

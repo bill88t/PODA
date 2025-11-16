@@ -1,6 +1,11 @@
+import { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router"
 
 function NotFound() {
+
+    useEffect(() => {
+        document.title = "Saloon PADA - Page Not found";
+    }, []);
 
     const navigate = useNavigate();
     setInterval(navigate, 5000, "/", { replace: true });
