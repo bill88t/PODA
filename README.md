@@ -20,3 +20,17 @@ make clean
 ```
 
 Η από πάνω εντολή καθαρίζει τα εκτελέσιμα
+
+```bash
+make build
+```
+
+Δημιουργείτε το main πρόγραμμα και χτίζει το frontend στον φάκελο
+`frontend/dist`
+όπου και γίνεται αναμετάδοση από το fiber σαν static asset
+
+Το index.html είναι ορισμένο ως το wildcard ώστε να μπορεί να
+αναπαράγει τα path του
+frontend
+
+
