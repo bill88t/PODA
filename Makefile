@@ -12,11 +12,9 @@ frontend:
 build: main frontend
 
 run: build
-	./main
+	PORT=$(PORT) ./main
 
-breadbuild: breadport | build
-
-
+breadrun: breadport | run
 
 main: main.go
 	PORT=$(PORT) go build $<
