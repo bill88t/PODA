@@ -2,8 +2,7 @@ PORT=5137
 
 .PHONY: breadport
 breadport:
-	$(eval PORT = 80)
-	echo $(PORT)
+	@$(eval PORT = 80)
 
 .PHONY: frontend
 frontend:
@@ -17,7 +16,7 @@ run: build
 breadrun: breadport | run
 
 main: main.go
-	PORT=$(PORT) go build $<
+	go build $<
 
 clean:
 	rm main
