@@ -4,6 +4,7 @@ import NotFound from './pages/NotFound.tsx'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import NavBar from './components/NavBar.tsx'
 import Login from './pages/Login.tsx'
+import "./index.sass"
 
 hydrateRoot(document,
     <BrowserRouter>

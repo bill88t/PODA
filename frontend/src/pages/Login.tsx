@@ -9,13 +9,14 @@ function Login() {
     return (
         <>
             <div className="form">
-                <div className="form-label">Username</div>
-                <div className="form-input"><input
+                <h1 className="grid-span-2">Login</h1>
+                <div>Username</div>
+                <div><input
                     name="username"
                     type="text"
                 /></div>
-                <div className="form-label">Password</div>
-                <div className="form-input"><input
+                <div>Password</div>
+                <div><input
                     name="password"
                     type="password"
                 /></div>

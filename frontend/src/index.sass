@@ -1,0 +1,38 @@
+*, *:before, *:after
+  margin: 0
+  padding: 8px
+  box-sizing: border-box
+
+main
+  width: 100vw
+  height: 100vh
+  display: flex
+  justify-content: center
+  align-items: below
+
+.form
+  max-width: 480px
+  width: 100%
+  margin: 0 auto // left right
+  padding: 20px
+  display: grid
+  grid-template-columns: 1fr
+
+  input
+    width: 100%
+
+.nav
+  display: flex
+  gap: 16px
+  width: 100%
+  padding: 0 8px
+
+@media(min-width: 480px)
+  $pad: 8px
+  .form
+    display: grid
+    grid-template-columns: 1fr 1fr
+
+    .grid-span-2
+      grid-column: span 2
+
