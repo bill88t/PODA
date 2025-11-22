@@ -9,7 +9,7 @@ function Login() {
     return (
         <>
             <div className="form">
-                <h1 className="grid-span-2">Login</h1>
+                <h1>Login</h1>
                 <div>Username</div>
                 <div><input
                     name="username"

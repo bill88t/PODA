@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router"
+import { Link, useNavigate } from "react-router"
 
 function NotFound() {
 
@@ -8,12 +8,13 @@ function NotFound() {
     }, []);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+
     const timeout = setTimeout(navigate, 5000, "/", { replace: true });
 
-    function stop() {
-        clearTimeout(timeout)
-        navigate("/");
-    }
+    return () => clearTimeout(timeout);
+    }, [navigate]);
 
     return (
         <>
@@ -21,7 +22,7 @@ function NotFound() {
             <p>
                 Unfortunally this link is broken.
                 We redirect you to home page
-                If that doesn't work, press <a onClick={stop}>here</a>
+                If that doesn't work, press <Link to="/" >here</Link>
             </p>
         </>
     )
