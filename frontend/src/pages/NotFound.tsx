@@ -8,7 +8,7 @@ function NotFound() {
     }, []);
 
     const navigate = useNavigate();
-    setInterval(navigate, 5000, "/", { replace: true });
+    setTimeout(navigate, 5000, "/", { replace: true });
 
     return (
         <>
