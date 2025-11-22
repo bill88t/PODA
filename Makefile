@@ -1,4 +1,4 @@
-PORT=5137
+PORT=5173
 
 .PHONY: breadport
 breadport:
@@ -10,7 +10,7 @@ frontend:
 
 build: main frontend
 
-run: build
+run:
 	PORT=$(PORT) ./main
 
 breadrun: breadport | run
