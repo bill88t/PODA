@@ -8,6 +8,9 @@ $brown-darker: color.scale($brown, $lightness: -75%)
 $green: #5D866C
 $green-dark: color.scale($green, $lightness: -25%)
 
+$nav-gap: 12px
+$nav-padding: 8px
+$form-gap: 8px
 
 *, *:before, *:after
   background-color: $white
@@ -16,10 +19,12 @@ $green-dark: color.scale($green, $lightness: -25%)
   box-sizing: border-box
 
 h1
-  padding: 12px
+  padding: 8px 16px
+  size: 24px
 
 p
-  padding: 18px
+  padding: 8px 16px
+  size: 16px
 
 a
   color: $green
@@ -38,10 +43,10 @@ main
   color: $brown-dark
   padding: 12px
   max-width: 480px
-  width: 100%
-  transform: translateY(50%)
-  margin: 0 auto // left right
-  gap: 8px
+  height: 100%
+  margin: auto
+  transform: translateY(25%)
+  gap: $form-gap
   display: grid
   grid-template-columns: 1fr
 
@@ -51,9 +56,10 @@ main
 
   input, button
     border-style: none
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 8px
-    padding: 8px
-    transform: translateY(-4px)
+    box-shadow: rgba($brown-darker, 0.2) 0 0 12px
+    padding: $form-gap
+    transform: translateY(-$form-gap/2)
+    border-radius: 4px
 
   button
     background-color: $grey
@@ -62,14 +68,24 @@ main
   input
     color: $brown-darker
 
+  h1
+    padding: 0
+
 .nav
   background-color: $green-dark
   color: $white
   display: flex
-  gap: 12px
-  padding: 12px
-  width: 100%
-  align-items: left
+  padding: $nav-padding
+
+  *
+    background-color: inherit
+
+  .nav-left
+    gap: $nav-gap
+    display: flex
+
+  .nav-right
+    margin-left: auto
 
   a
     display: inline-block
