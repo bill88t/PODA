@@ -4,8 +4,8 @@
 $white: #f5f5f0
 $grey: #E6D8C3
 $brown: #C2A68C
-$brown-dark: color.scale($brown, $lightness: -50%)
-$brown-darker: color.scale($brown, $lightness: -75%)
+$brown-dark: color.scale($brown, $lightness: -35%)
+$brown-darker: color.scale($brown, $lightness: -70%)
 $green: #5D866C
 $green-dark: color.scale($green, $lightness: -25%)
 
@@ -13,40 +13,65 @@ $nav-gap: 12px
 $nav-padding: 8px
 $form-gap: 8px
 
+$background-color: $white
+$form-background-color: $grey
+$text-color: $brown-darker
+$link-text-color: $green
+$button-background-color: $brown
+$button-text-color: $white
+$shadow-color: $brown-darker
+$input-background-color: inherit
+$input-text-color: $text-color
+
+$nav-background-color: $green
+$nav-text-color: $white
+
+@media(prefers-color-scheme: dark)
+  $background-color: $brown-darker !global
+  $text-color: $white !global
+  $button-background-color: $grey !global
+  $button-text-color: $background-color !global
+  $shadow-color: $grey !global
+  $input-background-color: $grey !global
+  $input-text-color: $background-color !global
+  $link-text-color: $grey !global
+
 *, *:before, *:after
-  background-color: $white
   margin: 0
   padding: 0
   box-sizing: border-box
 
-h1
+h1  
+  color: $text-color
   padding: 8px 16px
   size: 24px
 
 p
+  color: $text-color
   padding: 8px 16px
   size: 16px
 
 a
-  color: $green
+  color: $link-text-color
   text-decoration: none
 
-main
+body
+  background-color: $background-color
   width: 100%
-  max-width: 1920px
-  padding: 12px
   height: 100%
+  max-width: 1920px
   display: flex
   justify-content: center
   align-items: below
 
 .form
-  color: $brown-dark
+  color: $text-color
   padding: 12px
+  width: 100%
   max-width: 480px
+  min-height: 100%
   height: 100%
   margin: auto
-  transform: translateY(25%)
   gap: $form-gap
   display: grid
   grid-template-columns: 1fr
@@ -57,25 +82,27 @@ main
 
   input, button
     border-style: none
-    box-shadow: rgba($brown-darker, 0.2) 0 0 12px
+    box-shadow: rgba($shadow-color, 0.2) 0 0 12px
     padding: $form-gap
     transform: translateY(math.div(-$form-gap, 2))
     border-radius: 4px
 
   button
-    background-color: $grey
-    color: $brown-dark
+    background-color: $button-background-color
+    color: $button-text-color
     margin-top: math.div($form-gap, 2)
 
   input
-    color: $brown-darker
+    color: $input-text-color
+    background-color: $input-background-color
 
   h1
     padding: 0
 
 .nav
-  background-color: $green-dark
-  color: $white
+  width: 100vw
+  background-color: $nav-background-color
+  color: $nav-text-color
   display: flex
   padding: $nav-padding*2 $nav-padding
 
@@ -103,4 +130,3 @@ main
 
     h1
       grid-column: span 2
-
