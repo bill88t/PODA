@@ -34,3 +34,7 @@ This run the dist folder as a static server
   - [ ] Calendar with upcoming events
   - [ ] Edit account (change and delete(email - phone) info)
   - [ ] View blog (Highly optional - Hope to do it though)
+
+## Links
+
+For file [drag n drop](https://web.dev/patterns/files/drag-and-drop-files?hl=en#html)

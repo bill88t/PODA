@@ -1,9 +1,20 @@
-import { NavLink, useNavigate } from "react-router"
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router"
 
 function NotFound() {
 
+    useEffect(() => {
+        document.title = "Saloon PADA - Page Not found";
+    }, []);
+
     const navigate = useNavigate();
-    setInterval(navigate, 5000, "/", { replace: true });
+
+    useEffect(() => {
+
+    const timeout = setTimeout(navigate, 5000, "/", { replace: true });
+
+    return () => clearTimeout(timeout);
+    }, [navigate]);
 
     return (
         <>
@@ -11,7 +22,7 @@ function NotFound() {
             <p>
                 Unfortunally this link is broken.
                 We redirect you to home page
-                If that doesn't work, press <NavLink to="/">here</NavLink>
+                If that doesn't work, press <Link to="/" >here</Link>
             </p>
         </>
     )
