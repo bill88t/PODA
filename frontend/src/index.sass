@@ -13,6 +13,8 @@ $green-darker: color.scale($green, $lightness: -40%)
 $nav-gap: 12px
 $nav-padding: 8px
 $form-gap: 8px
+$title-size: 24px
+$text-size: 16px
 
 $background-color: $white
 $form-background-color: $grey
@@ -41,16 +43,16 @@ $nav-background-color-dark: $brown-darker
   margin: 0
   padding: 0
   box-sizing: border-box
-
+  line-height: 1.5em
 h1  
   color: $text-color
   padding: 8px 16px
-  size: 24px
+  size: $title-size
 
 p
   color: $text-color
   padding: 8px 16px
-  size: 16px
+  size: $text-size
 
 a
   color: $link-text-color
@@ -67,7 +69,7 @@ body
 
 .form
   color: $text-color
-  padding: 12px
+  padding: $form-gap
   width: 100%
   max-width: 480px
   min-height: 100%
@@ -91,14 +93,15 @@ body
   button
     background-color: $button-background-color
     color: $button-text-color
-    margin-top: math.div($form-gap, 2)
+    margin-top: math.div($form-gap, 2) // alignment
 
   input
     color: $input-text-color
     background-color: $input-background-color
 
   h1
-    padding: 0
+    padding: $form-gap 0
+    size: $title-size
 
 .nav
   width: 100vw
@@ -147,8 +150,6 @@ body
     background-color: $nav-background-color-dark
 
 @media(min-width: 480px)
-  $pad: 8px
-
   .form
     display: grid
     grid-template-columns: 1fr 1fr
