@@ -28,12 +28,27 @@ This run the dist folder as a static server
 
 ## Roadmap
 
+  - [x] Page Bot found
+    - [x] Lookup
+    - [x] Fuctionality
   - [ ] Login screen
+    - [x] Lookup
+    - [ ] Fuctionality
   - [ ] Barbers startup page
+    - [ ] Lookup
+    - [ ] Fuctionality
   - [ ] Clients startup page
+    - [ ] Lookup
+    - [ ] Fuctionality
   - [ ] Calendar with upcoming events
+    - [ ] Lookup
+    - [ ] Fuctionality
   - [ ] Edit account (change and delete(email - phone) info)
+    - [ ] Lookup
+    - [ ] Fuctionality
   - [ ] View blog (Highly optional - Hope to do it though)
+    - [ ] Lookup
+    - [ ] Fuctionality
 
 ## Links
 
