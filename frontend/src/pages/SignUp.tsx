@@ -9,33 +9,38 @@ function SignUp() {
     return (
         <>
             <div className="form">
-                <h1>Login</h1>
+                <h1>Sign Up</h1>
                 <div>First Name</div>
                 <input type="text" name="fname"/>
                 <div>Last Name</div>
                 <input type="text" name="lname"/>
                 <div>Email</div>
-                <div><input
+                <input
                     name="email"
                     pattern="[a-zA-Z0-9\.]+@[a-zA-Z0-9\.]+(\.[a-z]{2,3})?"
                     type="text"
-                /></div>
+                />
                 <div>Password</div>
-                <div><input
+                <input
                     name="password"
                     type="password"
                     min="8"
-                /></div>
+                />
                 <div>Phone</div>
-                <div><input
+                <input
                     name="phone"
                     type="number"
-                /></div>
+                />
                 <div>Address</div>
-                <div><input
+                <input
                     name="address"
                     type="text"
-                /></div>
+                />
+                <div>Birthday</div>
+                <input
+                    type="date"
+                    name="bdate"
+                />
                 <button>Sign Up</button>
                 <button>Abort</button>
             </div>
