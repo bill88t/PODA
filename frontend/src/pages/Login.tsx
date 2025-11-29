@@ -3,7 +3,7 @@ import { useEffect } from "react";
 function Login() {
 
     useEffect(() => {
-        document.title = "Saloon PADA - Home Page";
+        document.title = "Saloon PADA - Login";
     }, []);
 
     return (
