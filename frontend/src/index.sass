@@ -32,9 +32,9 @@ $nav-text-color: $white
 
 $background-color-dark: $black
 $text-color-dark: $white 
-$button-background-color-dark: $black 
-$button-text-color-dark: $background-color-dark
-$shadow-color-dark: $white
+$button-background-color-dark: $highlight
+$button-text-color-dark: $white
+$shadow-color-dark: $highlight
 $input-background-color-dark: $secondary
 $input-text-color-dark: $white
 $link-text-color-dark: $highlight-white
@@ -100,7 +100,7 @@ body
     color: $input-text-color
     background-color: $input-background-color
 
-  h1
+  h1, h2
     padding: $form-gap 0
     size: $title-size
 
@@ -148,6 +148,10 @@ body
       background-color: $button-background-color-dark
       color: $button-text-color-dark
 
+    input, button
+      border-style: none
+      box-shadow: rgba($shadow-color-dark, 0.3) 0 0 12px
+
   .nav
     background-color: $nav-background-color-dark
 
@@ -156,9 +160,6 @@ body
     display: grid
     grid-template-columns: 1fr 1fr
 
-    h1
+    h1, h2, .span2
       grid-column: span 2
 
-    input, button
-      border-style: none
-      box-shadow: rgba($shadow-color-dark, 0.2) 0 0 12px

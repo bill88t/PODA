@@ -7,6 +7,7 @@ import Login from './pages/Login.tsx'
 import "./index.sass"
 import React from 'react'
 import SignUp from './pages/SignUp.tsx'
+import Profile from './pages/Profile.tsx'
 
 createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
@@ -16,6 +17,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/sign_up" element={<SignUp />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     </BrowserRouter>
