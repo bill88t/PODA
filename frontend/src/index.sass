@@ -2,12 +2,12 @@
 @use 'sass:math'
 
 $primary: color.adjust(#3D8657, $saturation: -20%)
-$secondary: color.adjust(#86573D, $saturation: -10%)
+$secondary: color.adjust(#86573D, $saturation: -15%, $lightness: -2%)
 $highlight: color.adjust(#573D86, $saturation: -10%)
 
-$white: color.adjust($secondary, $lightness: 55%)
-$highlight-white: color.adjust($primary, $lightness: 70%)
-$black: color.adjust($secondary, $blackness: 90%)
+$white: color.adjust($secondary, $saturation: 5%, $lightness: 55%)
+$highlight-white: color.adjust($highlight, $saturation: 20%, $lightness: 45%)
+$black: color.adjust($secondary, $saturation: -10%, $lightness: -20%)
 
 // power of 8
 $gap: 16px
@@ -57,7 +57,6 @@ p
 
 a
   color: $link-text-color
-  text-decoration: none
 
 body
   background-color: $background-color
