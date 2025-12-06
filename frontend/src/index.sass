@@ -1,13 +1,13 @@
 @use 'sass:color'
 @use 'sass:math'
 
-$primary: #3D8657
-$secondary: #86573D
-$highlight: #573D86
+$primary: color.adjust(#3D8657, $saturation: -20%)
+$secondary: color.adjust(#86573D, $saturation: -10%)
+$highlight: color.adjust(#573D86, $saturation: -10%)
 
-$white: #F1E5E1
-$highlight-white: #F2F0F8
-$black: #2A1914
+$white: color.adjust($secondary, $lightness: 55%)
+$highlight-white: color.adjust($primary, $lightness: 70%)
+$black: color.adjust($secondary, $blackness: 90%)
 
 // power of 8
 $gap: 16px
@@ -34,7 +34,7 @@ $background-color-dark: $black
 $text-color-dark: $white 
 $button-background-color-dark: $highlight
 $button-text-color-dark: $white
-$shadow-color-dark: $highlight
+$shadow-color-dark: $black
 $input-background-color-dark: $secondary
 $input-text-color-dark: $white
 $link-text-color-dark: $highlight-white
