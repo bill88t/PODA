@@ -1,13 +1,14 @@
 import { useState } from "react"
 
-function ChangePassword() {
+enum flagSwitch {
+    password,
+    personalInformation,
+    contactInformation
+};
 
-    const [
-        changingPassword,
-        setChangingPassword
-    ] = useState<boolean>(false);
+function ChangePassword(prop: { flag: number; setFlag: (arg0: number) => void; }) {
     return (
-        changingPassword
+        prop.flag & (1 << flagSwitch.password)
         ?
         <>
             <div>Password</div>
@@ -19,7 +20,7 @@ function ChangePassword() {
                 className="span2"
                 onClick={
                     () => {
-                        setChangingPassword(false);
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.password));
                     }
                 }
             >Confirm Password Change</button>
@@ -30,20 +31,18 @@ function ChangePassword() {
                 id="change-password"
                 className="span2"
                 onClick={
-                    () => setChangingPassword(true)
+                    () => {
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.password));
+                    }
                 }
             >Change Password</button>
         </>
     );
 }
 
-function ChangePersonalData() {
-    const [
-        changingPersonalData,
-        setChangingPersonalData
-    ] = useState<boolean>(false);
+function ChangePersonalData(prop: { flag: number; setFlag: (arg0: number) => void; }) {
     return (
-        changingPersonalData
+        prop.flag & (1 << flagSwitch.personalInformation)
         ?
         <>
             <div>First Name</div>
@@ -55,7 +54,7 @@ function ChangePersonalData() {
                 id="change-personal-data"
                 onClick={
                     () => {
-                        setChangingPersonalData(false);
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.personalInformation));
                     }
                 }
             >Confirm Information Changes</button>
@@ -71,7 +70,7 @@ function ChangePersonalData() {
                 id="change-personal-data"
                 onClick={
                     () => {
-                        setChangingPersonalData(true);
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.personalInformation));
                     }
                 }
             >Edit Personal Information</button>
@@ -80,13 +79,9 @@ function ChangePersonalData() {
     )
 }
 
-function ChangeContactInformation() {
-    const [
-        changingContactInformation,
-        setChangingContactInformation
-    ] = useState<boolean>(false);
+function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) => void; }) {
     return (
-        changingContactInformation
+        prop.flag & (1 << flagSwitch.contactInformation)
         ?
         <>
             <div>Email</div>
@@ -98,7 +93,7 @@ function ChangeContactInformation() {
                 id="change-personal-data"
                 onClick={
                     () => {
-                        setChangingContactInformation(false);
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.contactInformation));
                     }
                 }
             >Confirm Contact changes</button>
@@ -114,7 +109,7 @@ function ChangeContactInformation() {
                 id="change-personal-data"
                 onClick={
                     () => {
-                        setChangingContactInformation(true);
+                        prop.setFlag(prop.flag ^ (1 << flagSwitch.contactInformation));
                     }
                 }
             >Edit Contact Information</button>
@@ -123,15 +118,19 @@ function ChangeContactInformation() {
 }
 
 export default function Profile() {
+    const [
+        flag,
+        setFlag
+    ] = useState<number>(0);
     return (
         <div className="form">
             <h1>Profile</h1>
             <h2>Personal Information</h2>
-            <ChangePersonalData />
+            <ChangePersonalData flag={flag} setFlag={setFlag} />
             <h2>Contact Information</h2>
-            <ChangeContactInformation />
+            <ChangeContactInformation flag={flag} setFlag={setFlag} />
             <h2>Security Information</h2>
-            <ChangePassword />
+            <ChangePassword flag={flag} setFlag={setFlag} />
         </div>
     );
 }
