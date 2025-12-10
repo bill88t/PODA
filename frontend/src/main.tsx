@@ -1,13 +1,14 @@
 import { createRoot } from 'react-dom/client'
-import Home from './pages/Home.tsx'
 import NotFound from './pages/NotFound.tsx'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import NavBar from './components/NavBar.tsx'
-import Login from './pages/Login.tsx'
 import "./index.sass"
-import React from 'react'
-import SignUp from './pages/SignUp.tsx'
-import Profile from './pages/Profile.tsx'
+import React, { lazy } from 'react'
+
+const Home = lazy(() => import("./pages/Home.tsx"))
+const SignUp = lazy(() => import("./pages/SignUp.tsx"))
+const Login = lazy(() => import("./pages/Login.tsx"))
+const Profile = lazy(() => import("./pages/Profile.tsx"))
 
 createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
