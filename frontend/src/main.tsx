@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client'
-import NotFound from './pages/NotFound.tsx'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import NavBar from './components/NavBar.tsx'
 import "./index.sass"
@@ -9,6 +8,7 @@ const Home = lazy(() => import("./pages/Home.tsx"))
 const SignUp = lazy(() => import("./pages/SignUp.tsx"))
 const Login = lazy(() => import("./pages/Login.tsx"))
 const Profile = lazy(() => import("./pages/Profile.tsx"))
+const NotFound = lazy(() => import("./pages/NotFound.tsx"))
 
 createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
