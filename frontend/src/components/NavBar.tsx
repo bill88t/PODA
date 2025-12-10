@@ -1,13 +1,17 @@
-function NavBar(prop: { setPath: (arg0: string) => void }) {
+function NavBar(prop: { setPath: (arg0: string) => void, path: string }) {
+    const setUrl = (s: string) => {
+        location.assign(s);
+        prop.setPath(s);
+    }
     return (
         <div className="nav">
             <div className="nav-left">
-                <a onClick={ () => prop.setPath("/") }>Home Page</a>
-                <a onClick={ () => prop.setPath("/login") }>Login</a>
-                <a onClick={ () => prop.setPath("/sign_up") }>Sign up</a>
+                <a onClick={ () => setUrl("/") }>Home Page</a>
+                <a onClick={ () => setUrl("/login") }>Login</a>
+                <a onClick={ () => setUrl("/sign_up") }>Sign up</a>
             </div>
             <div className="nav-right">
-                <a onClick={ () => prop.setPath("/profile") }>Profile</a>
+                <a onClick={ () => setUrl("/profile") }>Profile</a>
             </div>
         </div>
     )

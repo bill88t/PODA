@@ -9,12 +9,11 @@ const Login = lazy(() => import("./pages/Login.tsx"))
 const Profile = lazy(() => import("./pages/Profile.tsx"))
 const NotFound = lazy(() => import("./pages/NotFound.tsx"))
 
-
 export function Root() {
     const [path, setPath] = useState<string>(window.location.pathname);
     return (
         <React.StrictMode>
-            <NavBar setPath={setPath} />
+            <NavBar path={path} setPath={setPath} />
             {
                 path === "/" ? <Home /> :
                 path === "/login" ? <Login /> :
