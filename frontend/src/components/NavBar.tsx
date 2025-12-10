@@ -1,15 +1,13 @@
-import { Link } from "react-router"
-
-function NavBar() {
+function NavBar(prop: { setPath: (arg0: string) => void }) {
     return (
         <div className="nav">
             <div className="nav-left">
-                <Link to="/">Home Page</Link>
-                <Link to="/login">Login</Link>
-                <Link to="/sign_up">Sign up</Link>
+                <a onClick={ () => prop.setPath("/") }>Home Page</a>
+                <a onClick={ () => prop.setPath("/login") }>Login</a>
+                <a onClick={ () => prop.setPath("/sign_up") }>Sign up</a>
             </div>
             <div className="nav-right">
-                <Link to="/profile">Profile</Link>
+                <a onClick={ () => prop.setPath("/profile") }>Profile</a>
             </div>
         </div>
     )

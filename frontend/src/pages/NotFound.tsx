@@ -1,20 +1,17 @@
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router"
 
-function NotFound() {
+function NotFound(prop: { setPath: (arg0: string) => void; path: unknown; }) {
 
     useEffect(() => {
         document.title = "Saloon PADA - Page Not found";
     }, []);
 
-    const navigate = useNavigate();
-
     useEffect(() => {
 
-    const timeout = setTimeout(navigate, 5000, "/", { replace: true });
+    const timeout = setTimeout(() => prop.setPath("/"), 5000, "/", { replace: true });
 
     return () => clearTimeout(timeout);
-    }, [navigate]);
+    }, [prop.path]);
 
     return (
         <>
@@ -22,7 +19,7 @@ function NotFound() {
             <p>
                 Unfortunally this link is broken.
                 We redirect you to home page
-                If that doesn't work, press <Link to="/" >here</Link>
+                If that doesn't work, press <a onClick={ () => prop.setPath("/") } >here</a>
             </p>
         </>
     )
