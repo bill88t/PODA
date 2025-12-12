@@ -1,13 +1,8 @@
-import { useEffect } from "react"
-
 function App() {
-
-    useEffect(() => {
-        document.title = "Saloon PADA - Home Page";
-    }, []);
 
     return (
         <>
+            <title>Sallon PODA - Home Page</title>
             <h1>Welcome to Our Saloon</h1>
             <p>
                 The PADA Saloon is open from 2025

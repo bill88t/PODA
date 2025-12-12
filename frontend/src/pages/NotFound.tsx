@@ -6,10 +6,6 @@ export default function NotFound() {
     const { path, setPath } = usePath();
 
     useEffect(() => {
-        document.title = "Saloon PADA - Page Not found";
-    }, []);
-
-    useEffect(() => {
 
     const timeout = setTimeout(() => setPath("/"), 5000, "/", { replace: true });
 
@@ -18,6 +14,7 @@ export default function NotFound() {
 
     return (
         <>
+            <title>Saloon PODA - Page Not Found</title>
             <h1>Page not found</h1>
             <p>
                 Unfortunately this link is broken.

@@ -1,13 +1,7 @@
-import { useEffect } from "react";
-
 export default function SignUp() {
-
-    useEffect(() => {
-        document.title = "Saloon PADA - Sign Up";
-    }, []);
-
     return (
         <>
+            <title>Saloon PODA - Sign Up Page</title>
             <div className="form">
                 <h1>Sign Up</h1>
                 <div>First Name</div>

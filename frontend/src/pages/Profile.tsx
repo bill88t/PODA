@@ -123,14 +123,17 @@ export default function Profile() {
         setFlag
     ] = useState<number>(0);
     return (
-        <div className="form">
-            <h1>Profile</h1>
-            <h2>Personal Information</h2>
-            <ChangePersonalData flag={flag} setFlag={setFlag} />
-            <h2>Contact Information</h2>
-            <ChangeContactInformation flag={flag} setFlag={setFlag} />
-            <h2>Security Information</h2>
-            <ChangePassword flag={flag} setFlag={setFlag} />
-        </div>
+        <>
+        <title>Saloon PODA - Profile</title>
+            <div className="form">
+                <h1>Profile</h1>
+                <h2>Personal Information</h2>
+                <ChangePersonalData flag={flag} setFlag={setFlag} />
+                <h2>Contact Information</h2>
+                <ChangeContactInformation flag={flag} setFlag={setFlag} />
+                <h2>Security Information</h2>
+                <ChangePassword flag={flag} setFlag={setFlag} />
+            </div>
+        </>
     );
 }
