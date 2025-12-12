@@ -1,21 +1,17 @@
-function NavBar(prop: { setPath: (arg0: string) => void, path: string }) {
-    const setUrl = (s: string) => {
-        location.assign(s);
-        prop.setPath(s);
-    }
+import { usePath } from "./pathContext"
+
+export default function NavBar() {
+    const { setPath } = usePath();
     return (
         <div className="nav">
             <div className="nav-left">
-                <a onClick={ () => setUrl("/") }>Home Page</a>
-                <a onClick={ () => setUrl("/login") }>Login</a>
-                <a onClick={ () => setUrl("/sign_up") }>Sign up</a>
+                <a onClick={ () => setPath("/") }>Home Page</a>
+                <a onClick={ () => setPath("/login") }>Login</a>
+                <a onClick={ () => setPath("/sign_up") }>Sign up</a>
             </div>
             <div className="nav-right">
-                <a onClick={ () => setUrl("/profile") }>Profile</a>
+                <a onClick={ () => setPath("/profile") }>Profile</a>
             </div>
         </div>
     )
 }
-
-export default NavBar
-

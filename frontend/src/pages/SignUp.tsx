@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-function SignUp() {
+export default function SignUp() {
 
     useEffect(() => {
         document.title = "Saloon PADA - Sign Up";
@@ -16,36 +16,20 @@ function SignUp() {
                 <input type="text" name="lname"/>
                 <div>Email</div>
                 <input
-                    name="email"
+                    name="email" type="text"
                     pattern="[a-zA-Z0-9\.]+@[a-zA-Z0-9\.]+(\.[a-z]{2,3})?"
-                    type="text"
                 />
                 <div>Password</div>
-                <input
-                    name="password"
-                    type="password"
-                    min="8"
-                />
+                <input name="password" type="password" min="8" />
                 <div>Phone</div>
-                <input
-                    name="phone"
-                    type="number"
-                />
+                <input name="phone" type="number" />
                 <div>Address</div>
-                <input
-                    name="address"
-                    type="text"
-                />
+                <input name="address" type="text" />
                 <div>Birthday</div>
-                <input
-                    type="date"
-                    name="bdate"
-                />
+                <input type="date" name="bdate" />
                 <button>Sign Up</button>
                 <button>Abort</button>
             </div>
         </>
     )
 }
-
-export default SignUp;

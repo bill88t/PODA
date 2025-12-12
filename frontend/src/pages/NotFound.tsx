@@ -1,6 +1,9 @@
 import { useEffect } from "react";
+import { usePath } from "../components/pathContext";
 
-function NotFound(prop: { setPath: (arg0: string) => void; path: unknown; }) {
+export default function NotFound() {
+
+    const { path, setPath } = usePath();
 
     useEffect(() => {
         document.title = "Saloon PADA - Page Not found";
@@ -8,21 +11,19 @@ function NotFound(prop: { setPath: (arg0: string) => void; path: unknown; }) {
 
     useEffect(() => {
 
-    const timeout = setTimeout(() => prop.setPath("/"), 5000, "/", { replace: true });
+    const timeout = setTimeout(() => setPath("/"), 5000, "/", { replace: true });
 
     return () => clearTimeout(timeout);
-    }, [prop.path]);
+    }, [path, setPath]);
 
     return (
         <>
             <h1>Page not found</h1>
             <p>
-                Unfortunally this link is broken.
+                Unfortunately this link is broken.
                 We redirect you to home page
-                If that doesn't work, press <a onClick={ () => prop.setPath("/") } >here</a>
+                If that doesn't work, press <a onClick={ () => setPath("/") } >here</a>
             </p>
         </>
     )
 }
-
-export default NotFound
