@@ -1,8 +1,8 @@
 import { createRoot } from 'react-dom/client'
-import NavBar from './components/NavBar.tsx'
-import "./index.sass"
 import React, { lazy } from 'react'
+import "./index.sass"
 import PathProvider from './components/PathProvider.tsx'
+import NavBar from './components/NavBar.tsx'
 import { usePath } from './components/pathContext.tsx'
 
 const Home = lazy(() => import("./pages/Home.tsx"))
@@ -13,25 +13,21 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"))
 
 function Main() {
     const { path } = usePath();
-    return (
-        <>
-            {
-                path === "/" ? <Home /> :
-                path === "/login" ? <Login /> :
-                path === "/sign_up" ? <SignUp /> :
-                path === "/profile" ? <Profile /> :
-                <NotFound />
-            }
-        </>
-    )
+    switch (path) {
+        case "/"       : return <Home />;
+        case "/login"  : return <Login />;
+        case "/sign_up": return <SignUp />;
+        case "/profile": return <Profile />;
+        default        : return <NotFound />;
+    }
 }
 
 export function Root() {
     return (
         <React.StrictMode>
-        <PathProvider>
-            <NavBar />
-            <Main />
+            <PathProvider>
+                <NavBar />
+                <Main />
             </PathProvider>
         </React.StrictMode>
     )
