@@ -1,16 +1,26 @@
-import { usePath } from "./pathContext"
+import { usePath } from "./path/pathContext"
+import { UserKind, useUser } from "./user/userContext";
 
 export default function NavBar() {
     const { setPath } = usePath();
+    const { getUser } = useUser();
     return (
         <div className="nav">
-            <div className="nav-left">
-                <a onClick={ () => setPath("/") }>Home Page</a>
-                <a onClick={ () => setPath("/login") }>Login</a>
-                <a onClick={ () => setPath("/sign_up") }>Sign up</a>
-            </div>
+            <a onClick={ () => setPath("/") }>Home Page</a>
             <div className="nav-right">
-                <a onClick={ () => setPath("/profile") }>Profile</a>
+                {
+                    (getUser().kind === UserKind.guess) ?
+                    <>
+                        <a onClick={ () => setPath("/login") }>Login</a>
+                        <a onClick={ () => setPath("/sign_up") }>Sign up</a>
+                    </>
+                    : <></>
+                }
+                {
+                    getUser().kind !== UserKind.guess ?
+                    <a onClick={ () => setPath("/profile") }>Profile</a>
+                    : <></>
+                }
             </div>
         </div>
     )

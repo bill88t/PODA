@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { usePath } from "../components/pathContext";
+import { usePath } from "../components/path/pathContext";
 
 export default function NotFound() {
 

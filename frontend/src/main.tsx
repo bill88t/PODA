@@ -1,9 +1,10 @@
 import { createRoot } from 'react-dom/client'
 import React, { lazy } from 'react'
 import "./index.sass"
-import PathProvider from './components/PathProvider.tsx'
+import PathProvider from './components/path/PathProvider.tsx'
 import NavBar from './components/NavBar.tsx'
-import { usePath } from './components/pathContext.tsx'
+import { usePath } from './components/path/pathContext.tsx'
+import { UserProvider } from './components/user/UserProvider.tsx'
 
 const Home = lazy(() => import("./pages/Home.tsx"))
 const SignUp = lazy(() => import("./pages/SignUp.tsx"))
@@ -25,10 +26,12 @@ function Main() {
 export function Root() {
     return (
         <React.StrictMode>
-            <PathProvider>
-                <NavBar />
-                <Main />
-            </PathProvider>
+            <UserProvider>
+                <PathProvider>
+                    <NavBar />
+                    <Main />
+                </PathProvider>
+            </UserProvider>
         </React.StrictMode>
     )
 }
