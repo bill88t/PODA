@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { usePath } from "../components/path/pathContext";
-import { UserKind, useUser } from "../components/user/userContext"
+import { useUser } from "../components/user/userContext"
 
 export default function Login() {
     const { setPath } = usePath();
@@ -16,7 +16,6 @@ export default function Login() {
                 {error ? <div className="span2">{error}</div> : <></>}
                 <div>Email</div>
                 <div><input
-                    pattern="[a-zA-Z0-9\.]+@[a-zA-Z0-9\.]+(\.[a-z]{2,3})?"
                     type="text"
                     onChange={e => setEmail(e.target.value)}
                 /></div>
@@ -28,16 +27,16 @@ export default function Login() {
                 /></div>
                 <button
                     onClick={
-                        () => { 
-                            const u = userCtx.connect(email, password)
-                            if (u.kind !== UserKind.guess) { 
-                                setPath("/")
+                        async () => { 
+                            const ok = await userCtx.connect(email, password)
+                        if (ok) {
+                                setPath("/");
                             } else setError("Invalid Input"); 
                         }
                     }
                 >Login</button>
                 <button onClick={
-                    () => setPath("/sign_up")
+                    () => { setPath("/sign_up"); }
                 }>Sign up</button>
             </div>
         </>

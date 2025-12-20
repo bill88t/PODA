@@ -6,6 +6,6 @@ export const PathContext = createContext<PathContextType | undefined>(undefined)
 
 export function usePath(): PathContextType {
     const ctx = useContext(PathContext);
-    if (ctx == undefined) throw("Not implemented path ctx");
+    if (ctx == undefined) throw new Error("Not implemented path ctx");
     return ctx;
 }

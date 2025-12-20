@@ -1,85 +1,102 @@
 import { useState, type ReactNode } from "react";
-import { UserContext, UserKind, type User } from "../userContext";
+import { UserContext, UserKind, type AuthUser, type User } from "../userContext";
 
-const users: User[] = [
+let users: AuthUser[] = [
     {
-        kind: UserKind.client,
-        email: "john@email.com",
-        password: "john1",
-        phone: "12345",
-        birthday: new Date("2020-01-02")
+        fname: "John",
+        lname: "Bar",
+        email: "john@j.j",
+        password: "john",
+        phone: "123",
+        birthday: new Date("2010-01-02"),
+        kind: UserKind.client
     }
-]
+];
 
 export function UserProvider(prop: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(null);
 
-    const [user, setUser] = useState<User>({kind:UserKind.guess});
-
-    function connect(email: string, password: string) {
-        const u = users.filter(
-            u => u.email == email && u.password == password);
-        if (u.length === 1) {
-            setUser(u[0]);
-            return u[0];
-        }
-        return {kind: UserKind.guess}
-    }
-
-    function disconnect() {
-        setUser({kind:UserKind.guess})
-        return;
-    }
-
-    function changeEmail(email: string) {
-        for (let i = 0; i < users.length; ++i) {
-            if (users[i].email == user.email) {
-                users[i].email = email
+    async function connect(email: string, password: string): Promise<boolean> {
+        for (let i = 0; i<users.length; ++i) {
+            if (users[i].email === email
+                    && users[i].password === password) {
+                setUser(users[i]);
+                return true;
             }
         }
-        setUser({...user, email: email});
-        return user;
+        return false;
     }
 
-    function changeInfo(fname: string, lname: string) {
+    async function disconnect() {
+        setUser(null);
+    }
+
+    async function changeEmail(email: string): Promise<boolean> {
         for (let i = 0; i < users.length; ++i) {
-            if (users[i].email == user.email) {
+            if (user && users[i].email === user.email) {
+                users[i].email = email;
+                break;
+            }
+        }
+        if (user) {
+            const u = {...user, email: email};
+            setUser(u);
+            return true;
+        }
+        return false;
+    }
+
+    async function changeInfo(
+        fname: string, lname: string, birthday: Date
+    ): Promise<boolean> {
+        for (let i = 0; i < users.length; ++i) {
+            if (user && users[i].email === user.email) {
                 users[i].fname = fname;
                 users[i].lname = lname;
+                users[i].birthday = birthday;
             }
         }
-        setUser({...user, fname: fname, lname: lname});
-        return user;
 
+        if (user) {
+            const u = {...user, fname: fname,
+                        lname: lname, birthday: birthday};
+            setUser(u);
+            return true;
+        }
+        return false;
     }
 
-    function changePassword(password: string) {
+    async function changePassword(password: string): Promise<boolean> {
         for (let i = 0; i < users.length; ++i) {
-            if (users[i].email == user.email) {
+            if (user && users[i].email === user.email) {
                 users[i].password = password;
             }
         }
-        setUser({...user, password: password});
-        return user;
+
+        if (user) {
+            const u = {...user, password: password};
+            setUser(u);
+            return true;
+        }
+        return false;
 
     }
 
-    function getUser() { return user; }
-
-    function createAccount(
+    async function createAccount (
         fname: string, lname: string,
         email: string, password: string,
-        birthday: Date, phone: string, kind: UserKind
-    ) {
+        birthday: Date, phone: string, address: string,
+        kind: UserKind
+    ): Promise<boolean> {
         const u = {fname: fname, lname: lname, email: email,
         password: password, birthday: birthday, phone: phone,
-        kind: kind}
+        address: address, kind: kind}
         if( users.filter(us => us.email == email).length == 0 ) {
-            users.push(u);
+            users = [...users, u];
             setUser(u);
-            return u;
+            return true;
         }
-
-        return null;
+        return false;
     }
 
     return(
@@ -91,7 +108,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                 changeInfo: changeInfo,
                 changePassword: changePassword,
                 createAccount: createAccount,
-                getUser: getUser,
+                user: user,
             }
         }>
             { prop.children }

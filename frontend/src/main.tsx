@@ -26,12 +26,12 @@ function Main() {
 export function Root() {
     return (
         <React.StrictMode>
-            <UserProvider>
-                <PathProvider>
+            <PathProvider>
+                <UserProvider>
                     <NavBar />
                     <Main />
-                </PathProvider>
-            </UserProvider>
+                </UserProvider>
+            </PathProvider>
         </React.StrictMode>
     )
 }
