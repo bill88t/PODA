@@ -53,14 +53,14 @@ export default function SignUp() {
                 />
                 <button
                     onClick={
-                        () => {
-                            const u = userCtx.createAccount(
+                        async () => {
+                            const ok = await userCtx.createAccount(
                                 fname, lname,
                                 email, password,
                                 bdate, phone,
                                 address, UserKind.client
                             );
-                            if (u) setPath("/");
+                            if (ok) setPath("/");
                             else setError("Could not create account")
                         }
                     }
