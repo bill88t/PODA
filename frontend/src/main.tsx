@@ -1,5 +1,5 @@
 import { createRoot } from 'react-dom/client'
-import React, { lazy } from 'react'
+import { lazy, StrictMode } from 'react'
 import "./index.sass"
 import PathProvider from './components/path/PathProvider.tsx'
 import NavBar from './components/NavBar.tsx'
@@ -25,14 +25,14 @@ function Main() {
 
 export function Root() {
     return (
-        <React.StrictMode>
+        <StrictMode>
             <PathProvider>
                 <UserProvider>
                     <NavBar />
                     <Main />
                 </UserProvider>
             </PathProvider>
-        </React.StrictMode>
+        </StrictMode>
     )
 }
 

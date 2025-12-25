@@ -13,7 +13,7 @@ export default function Login() {
             <title>Saloon PODA - Login</title>
             <div className="form">
                 <h1>Login</h1>
-                {error ? <div className="span2">{error}</div> : <></>}
+                {error ? <div className="span2 error">{error}</div> : <></>}
                 <div>Email</div>
                 <div><input
                     type="text"
