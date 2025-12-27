@@ -8,6 +8,7 @@ let users: AuthUser[] = [
         email: "john@j.j",
         password: "john",
         phone: "123",
+        address: null,
         birthday: new Date("2010-01-02"),
         kind: UserKind.client
     }
@@ -85,7 +86,7 @@ export function UserProvider(prop: { children: ReactNode }) {
     async function createAccount (
         fname: string, lname: string,
         email: string, password: string,
-        birthday: Date, phone: string, address: string,
+        birthday: Date, phone: string, address: string | null,
         kind: UserKind
     ): Promise<boolean> {
         const u = {fname: fname, lname: lname, email: email,

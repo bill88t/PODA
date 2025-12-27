@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useUser } from "../components/user/userContext";
 
 enum flagSwitch {
     password,
@@ -7,20 +8,41 @@ enum flagSwitch {
 };
 
 function ChangePassword(prop: { flag: number; setFlag: (arg0: number) => void; }) {
+    const { changePassword }  = useUser();
+    const [ password, setPassword ] = useState<string>("");
+    const [ valid, setValid ] = useState<boolean>(false);
+    const { error, setError } = useState<string | null>(null);
     return (
         prop.flag & (1 << flagSwitch.password)
         ?
         <>
+            { error !== null ? <div className="span2 error">{error}</div> : <></> }
             <div>Password</div>
-            <input className="password1" type="password" />
+            <input type="password"
+                onChange={ e => {
+                    setPassword(e.target.value);
+                } }
+            />
             <div>Re-enter password</div>
-            <input className="password2" type="password" />
+            <input type="password"
+                onChange={ e => {
+                    setValid(e.target.value === password)
+                } }
+                />
             <button
-                id="change-password"
                 className="span2"
                 onClick={
-                    () => {
-                        prop.setFlag(prop.flag ^ (1 << flagSwitch.password));
+                    async () => {
+                        const rgPassword = /\w{8,}/
+                        if (!valid) {
+                            setError("Password don't match");
+                        }
+                        if (!rgPassword.test(password)) {
+                            setError("Password must ve at least 8 characters");
+                        }
+                        const ok = await changePassword(password);
+                        if (ok) prop.setFlag(prop.flag ^ (1 << flagSwitch.password));
+                        else setError("Could not change Password");
                     }
                 }
             >Confirm Password Change</button>

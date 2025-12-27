@@ -14,6 +14,7 @@ export type AuthUser = {
     phone: string;
     password: string;
     birthday: Date;
+    address: string | null;
 };
 
 export type User = null | AuthUser;
@@ -28,7 +29,7 @@ export type UserContextType = {
             fname: string, lname: string,
             email: string, password: string,
             birthday: Date, phone: string,
-            address:string, kind: UserKind ) => Promise<boolean>;
+            address:string | null, kind: UserKind ) => Promise<boolean>;
     user: User;
 }
 

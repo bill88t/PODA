@@ -3,7 +3,7 @@ import { useUser } from "./user/userContext";
 
 export default function NavBar() {
     const { setPath } = usePath();
-    const { user } = useUser();
+    const { user, disconnect } = useUser();
     const noLogged = user === null;
     return (
         <div className="nav">
@@ -26,6 +26,11 @@ export default function NavBar() {
                     </>
                     :
                     <>
+                        <a onClick= { e => {
+                            e.preventDefault();
+                            disconnect();
+                            setPath("/");
+                        } }>Log out</a>
                         <a onClick={ e => {
                             e.preventDefault();
                             setPath("/profile");

@@ -11,6 +11,7 @@ export default function SignUp() {
     const [lname,    setLname]    = useState<string>("");
     const [email,    setEmail]    = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [validPassword, setValidPassword] = useState<boolean>(false);
     const [phone,    setPhone]    = useState<string>("");
     const [address,  setAddress]  = useState<string>("");
     const [bdate,    setBdate]    = useState<Date>(new Date(Date.now()));
@@ -20,7 +21,7 @@ export default function SignUp() {
             <div className="form">
                 <h1>Sign Up</h1>
                 {
-                    error ? <div className="span2">{error}</div> : <></>
+                    error ? <div className="span2 error">{error}</div> : <></>
                 }
                 <div>First Name</div>
                 <input type="text"
@@ -39,6 +40,10 @@ export default function SignUp() {
                 <input type="password"
                     onChange={e => setPassword(e.target.value)}    
                 />
+                <div>Password again</div>
+                <input type="password"
+                    onChange={e => setValidPassword(e.target.value === password)}    
+                />
                 <div>Phone</div>
                 <input type="number"
                     onChange={e => setPhone(e.target.value)}    
@@ -54,11 +59,51 @@ export default function SignUp() {
                 <button
                     onClick={
                         async () => {
+                            if (fname === "") {
+                                setError("Missing First Name");
+                                return;
+                            }
+                            if (lname === "") {
+                                setError("Missing Last Name");
+                                return;
+                            }
+                            if (email === "") {
+                                setError("Missing Email");
+                                return;
+                            }
+                            const rgEmail = /\w+@\w+\.\w{2,3}?/;
+                            if (!rgEmail.test(email)) {
+                                setError("Give valid Email");
+                                return;
+                            }
+                            if (bdate === null) {
+                                setError("Missing birthday");
+                                return;
+                            }
+                            if (phone === "") {
+                                setError("Missing Phone");
+                                return;
+                            }
+                            const rgPhone = /(\+[0-9]{2})?[0-9]{10}/
+                            if (!rgPhone.test(phone)) {
+                                setError("Give valid phone");
+                                return;
+                            }
+                            if (!validPassword) {
+                                setError("Passwords don't match");
+                                return;
+                            }
+                            const rgPassword = /\w{8,}/
+                            if (!rgPassword.test(password)) {
+                                setError("Password must contain 8 characters");
+                                return;
+                            }
+                            const addr = address !== "" ? address : null;
                             const ok = await userCtx.createAccount(
                                 fname, lname,
                                 email, password,
                                 bdate, phone,
-                                address, UserKind.client
+                                addr, UserKind.client
                             );
                             if (ok) setPath("/");
                             else setError("Could not create account")
