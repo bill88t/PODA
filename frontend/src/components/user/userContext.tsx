@@ -24,7 +24,7 @@ export type UserContextType = {
     disconnect: () => void,
     changePassword: (password: string) => Promise<boolean>,
     changeInfo: (fname: string, lname: string, birthdate: Date) => Promise<boolean>,
-    changeEmail: (email: string) => Promise<boolean>;
+    changeContact: (email: string, phone? : string) => Promise<boolean>;
     createAccount: (
             fname: string, lname: string,
             email: string, password: string,
