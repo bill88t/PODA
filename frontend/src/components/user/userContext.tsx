@@ -4,7 +4,18 @@ export enum UserKind {
     client = "client",
     barber = "barber",
     admin = "admin",
+};
+
+export enum AppointmentKind {
+    haircut = "haircut",
+    hairdye = "hairdye",
+    other = "other",
 }
+
+export type Appointment = {
+    datetime: Date;
+    kind: AppointmentKind; 
+};
 
 export type AuthUser = {
     kind: UserKind
@@ -15,6 +26,7 @@ export type AuthUser = {
     password: string;
     birthday: Date;
     address: string | null;
+    appointments?: Appointment [];
 };
 
 export type User = null | AuthUser;
