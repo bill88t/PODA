@@ -32,7 +32,6 @@ function ChangePassword(prop: { flag: number; setFlag: (arg0: number) => void; }
                 } }
                 />
             <button
-                className="span2"
                 onClick={
                     async () => {
                         const rgPassword = /\w{8,}/
@@ -48,6 +47,11 @@ function ChangePassword(prop: { flag: number; setFlag: (arg0: number) => void; }
                     }
                 }
             >Confirm Password Change</button>
+            <button
+                onClick={ () => {
+                    prop.setFlag(prop.flag ^ (1 << flagSwitch.password))
+                }}>Abort Changes</button>
+
         </>
         :
         <>
@@ -90,7 +94,6 @@ function ChangePersonalData(prop: { flag: number; setFlag: (arg0: number) => voi
             onChange={ e => { setBirthdate(new Date(e.target.value)) } }
             />
             <button
-                className="span2"
                 onClick={
                     async () => {
                         if (fname === "") {
@@ -110,6 +113,10 @@ function ChangePersonalData(prop: { flag: number; setFlag: (arg0: number) => voi
                     }
                 }
             >Confirm Information Changes</button>
+            <button
+                onClick={ () => {
+                    prop.setFlag(prop.flag ^ (1 << flagSwitch.personalInformation))
+                }}>Abort Changes</button>
         </>
         :
         <>
@@ -162,7 +169,6 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
             } }
             />
             <button
-                className="span2"
                 onClick={
                     async () => {
                         const rgEmail = /\w+@\w+\.\w{2,3}/
@@ -183,6 +189,10 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
                         prop.setFlag(prop.flag ^ (1 << flagSwitch.contactInformation));
                 } }
             >Confirm Contact changes</button>
+            <button
+                onClick={ () => {
+                    prop.setFlag(prop.flag ^ (1 << flagSwitch.contactInformation))
+                }}>Abort Changes</button>
         </>
         :
         <>

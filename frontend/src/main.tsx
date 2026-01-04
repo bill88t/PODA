@@ -5,6 +5,7 @@ import PathProvider from './components/path/PathProvider.tsx'
 import NavBar from './components/NavBar.tsx'
 import { usePath } from './components/path/pathContext.tsx'
 import { UserProvider } from './components/user/UserProvider.tsx'
+import { useUser } from './components/user/userContext.tsx'
 
 const Home = lazy(() => import("./pages/Home.tsx"))
 const SignUp = lazy(() => import("./pages/SignUp.tsx"))
@@ -14,11 +15,14 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"))
 
 function Main() {
     const { path } = usePath();
+    const { user } = useUser();
     switch (path) {
         case "/"       : return <Home />;
-        case "/login"  : return <Login />;
+        case "/login"  : return (
+            user === null ? <Login /> : <Home /> );
         case "/sign_up": return <SignUp />;
-        case "/profile": return <Profile />;
+        case "/profile": return (
+            user !== null ? <Profile /> : <Home /> );
         default        : return <NotFound />;
     }
 }
