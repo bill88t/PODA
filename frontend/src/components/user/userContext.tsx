@@ -12,13 +12,18 @@ export enum AppointmentKind {
     other = "other",
 }
 
+// one to many
 export type Appointment = {
+    id: number;
     datetime: Date;
-    kind: AppointmentKind; 
+    kind: AppointmentKind;
 };
 
+export type Uuid = string | number;
+
 export type AuthUser = {
-    kind: UserKind
+    uuid: Uuid;
+    kind: UserKind;
     fname: string;
     lname: string;
     email: string;
@@ -26,7 +31,7 @@ export type AuthUser = {
     password: string;
     birthday: Date;
     address: string | null;
-    appointments?: Appointment [];
+    appointments: Appointment [] | null;
 };
 
 export type User = null | AuthUser;
@@ -42,6 +47,9 @@ export type UserContextType = {
             email: string, password: string,
             birthday: Date, phone: string,
             address:string | null, kind: UserKind ) => Promise<boolean>;
+    createAppointment?: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
+    deleteAppointment?: (uuid: Uuid, id: number) => Promise<boolean>;
+    viewAppointment?: (uuid: Uuid) => Promise<Appointment[] | null>
     user: User;
 }
 

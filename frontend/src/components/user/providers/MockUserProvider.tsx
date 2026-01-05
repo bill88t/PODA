@@ -1,8 +1,11 @@
 import { useState, type ReactNode } from "react";
 import { UserContext, UserKind, type AuthUser, type User } from "../userContext";
 
+let uui = 1;
+
 let users: AuthUser[] = [
     {
+        uuid: uui++,
         fname: "John",
         lname: "Bar",
         email: "john@j.j",
@@ -10,7 +13,8 @@ let users: AuthUser[] = [
         phone: "123",
         address: null,
         birthday: new Date("2010-01-02"),
-        kind: UserKind.client
+        kind: UserKind.client,
+        appointments: []
     }
 ];
 
@@ -94,7 +98,8 @@ export function UserProvider(prop: { children: ReactNode }) {
     ): Promise<boolean> {
         const u = {fname: fname, lname: lname, email: email,
         password: password, birthday: birthday, phone: phone,
-        address: address, kind: kind}
+        address: address, kind: kind, uuid: uui++,
+        appointments: []}
         if( users.filter(us => us.email == email).length == 0 ) {
             users = [...users, u];
             setUser(u);
