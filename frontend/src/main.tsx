@@ -18,11 +18,24 @@ function Main() {
     const { user } = useUser();
     switch (path) {
         case "/"       : return <Home />;
-        case "/login"  : return (
-            user === null ? <Login /> : <Home /> );
+        case "/login"  : {
+            if (user === null) {
+                return <Login />
+            }
+            else { 
+                history.pushState({}, "", "/");
+                return <Home />
+            };
+        }
         case "/sign_up": return <SignUp />;
-        case "/profile": return (
-            user !== null ? <Profile /> : <Home /> );
+        case "/profile": {
+            if (user !== null) {
+                return <Profile />
+            } else {
+                history.pushState({}, "", "/");
+                return <Home />
+            }
+        }
         default        : return <NotFound />;
     }
 }
