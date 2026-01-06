@@ -1,15 +1,20 @@
 import { useState, type ReactNode } from "react";
 import { UserContext, UserKind, type AuthUser, type User } from "../userContext";
 
+let uui = 1;
+
 let users: AuthUser[] = [
     {
+        uuid: uui++,
         fname: "John",
         lname: "Bar",
         email: "john@j.j",
         password: "john",
         phone: "123",
+        address: null,
         birthday: new Date("2010-01-02"),
-        kind: UserKind.client
+        kind: UserKind.client,
+        appointments: []
     }
 ];
 
@@ -31,7 +36,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         setUser(null);
     }
 
-    async function changeEmail(email: string): Promise<boolean> {
+    async function changeContact(email: string, phone? : string): Promise<boolean> {
         for (let i = 0; i < users.length; ++i) {
             if (user && users[i].email === user.email) {
                 users[i].email = email;
@@ -39,7 +44,10 @@ export function UserProvider(prop: { children: ReactNode }) {
             }
         }
         if (user) {
-            const u = {...user, email: email};
+            let u = {...user, email: email};
+            if (phone !== undefined) {
+                u = {...user, phone: phone};
+            }
             setUser(u);
             return true;
         }
@@ -85,12 +93,13 @@ export function UserProvider(prop: { children: ReactNode }) {
     async function createAccount (
         fname: string, lname: string,
         email: string, password: string,
-        birthday: Date, phone: string, address: string,
+        birthday: Date, phone: string, address: string | null,
         kind: UserKind
     ): Promise<boolean> {
         const u = {fname: fname, lname: lname, email: email,
         password: password, birthday: birthday, phone: phone,
-        address: address, kind: kind}
+        address: address, kind: kind, uuid: uui++,
+        appointments: []}
         if( users.filter(us => us.email == email).length == 0 ) {
             users = [...users, u];
             setUser(u);
@@ -104,7 +113,7 @@ export function UserProvider(prop: { children: ReactNode }) {
             {
                 connect: connect,
                 disconnect: disconnect,
-                changeEmail: changeEmail,
+                changeContact: changeContact,
                 changeInfo: changeInfo,
                 changePassword: changePassword,
                 createAccount: createAccount,

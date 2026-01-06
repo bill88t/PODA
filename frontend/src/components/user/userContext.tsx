@@ -4,16 +4,34 @@ export enum UserKind {
     client = "client",
     barber = "barber",
     admin = "admin",
+};
+
+export enum AppointmentKind {
+    haircut = "haircut",
+    hairdye = "hairdye",
+    other = "other",
 }
 
+// one to many
+export type Appointment = {
+    id: number;
+    datetime: Date;
+    kind: AppointmentKind;
+};
+
+export type Uuid = string | number;
+
 export type AuthUser = {
-    kind: UserKind
+    uuid: Uuid;
+    kind: UserKind;
     fname: string;
     lname: string;
     email: string;
     phone: string;
     password: string;
     birthday: Date;
+    address: string | null;
+    appointments: Appointment [] | null;
 };
 
 export type User = null | AuthUser;
@@ -23,12 +41,15 @@ export type UserContextType = {
     disconnect: () => void,
     changePassword: (password: string) => Promise<boolean>,
     changeInfo: (fname: string, lname: string, birthdate: Date) => Promise<boolean>,
-    changeEmail: (email: string) => Promise<boolean>;
+    changeContact: (email: string, phone? : string) => Promise<boolean>;
     createAccount: (
             fname: string, lname: string,
             email: string, password: string,
             birthday: Date, phone: string,
-            address:string, kind: UserKind ) => Promise<boolean>;
+            address:string | null, kind: UserKind ) => Promise<boolean>;
+    createAppointment?: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
+    deleteAppointment?: (uuid: Uuid, id: number) => Promise<boolean>;
+    viewAppointment?: (uuid: Uuid) => Promise<Appointment[] | null>
     user: User;
 }
 

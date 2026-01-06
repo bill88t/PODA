@@ -8,6 +8,8 @@ $highlight: color.adjust(#573D86, $saturation: -10%)
 $white: color.adjust($secondary, $saturation: 5%, $lightness: 55%)
 $highlight-white: color.adjust($highlight, $saturation: 20%, $lightness: 45%)
 $black: color.adjust($secondary, $saturation: -10%, $lightness: -20%)
+$red: color.adjust(#B35764, $lightness: -5%)
+$blue :#3D4886
 
 // power of 8
 $gap: 16px
@@ -39,6 +41,9 @@ $input-background-color-dark: $secondary
 $input-text-color-dark: $white
 $link-text-color-dark: $highlight-white
 $nav-background-color-dark: $primary
+
+.error
+  color: $red
 
 *, *:before, *:after
   margin: 0

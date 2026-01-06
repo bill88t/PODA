@@ -1,10 +1,11 @@
 import { createRoot } from 'react-dom/client'
-import React, { lazy } from 'react'
+import { lazy, StrictMode } from 'react'
 import "./index.sass"
 import PathProvider from './components/path/PathProvider.tsx'
 import NavBar from './components/NavBar.tsx'
 import { usePath } from './components/path/pathContext.tsx'
 import { UserProvider } from './components/user/UserProvider.tsx'
+import { useUser } from './components/user/userContext.tsx'
 
 const Home = lazy(() => import("./pages/Home.tsx"))
 const SignUp = lazy(() => import("./pages/SignUp.tsx"))
@@ -14,25 +15,41 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"))
 
 function Main() {
     const { path } = usePath();
+    const { user } = useUser();
     switch (path) {
         case "/"       : return <Home />;
-        case "/login"  : return <Login />;
+        case "/login"  : {
+            if (user === null) {
+                return <Login />
+            }
+            else { 
+                history.pushState({}, "", "/");
+                return <Home />
+            };
+        }
         case "/sign_up": return <SignUp />;
-        case "/profile": return <Profile />;
+        case "/profile": {
+            if (user !== null) {
+                return <Profile />
+            } else {
+                history.pushState({}, "", "/");
+                return <Home />
+            }
+        }
         default        : return <NotFound />;
     }
 }
 
 export function Root() {
     return (
-        <React.StrictMode>
+        <StrictMode>
             <PathProvider>
                 <UserProvider>
                     <NavBar />
                     <Main />
                 </UserProvider>
             </PathProvider>
-        </React.StrictMode>
+        </StrictMode>
     )
 }
 
