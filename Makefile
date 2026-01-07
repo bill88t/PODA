@@ -17,17 +17,21 @@ breadport:
 
 .PHONY: frontend
 frontend:  check-tsc
-	cd frontend; npm run build
+	@echo "Building frontend.."
+	@cd frontend; npm run build
 
 build: check-go main frontend
 
 run:
-	PORT=$(PORT) ./main
+	@echo "Running on port $PORT"
+	@PORT=$(PORT) ./main
 
 breadrun: breadport | run
 
 main: main.go
-	go build $<
+	@echo "Building backend.."
+	@go build $<
 
 clean:
-	rm -f main
+	@echo "Cleaning.."
+	@rm -f main
