@@ -1,12 +1,18 @@
 repos:
-  - repo: https://github.com/lietu/go-pre-commit
-    rev: v1.0.0
-    hooks:
-      - id: errcheck
-      - id: go-fmt-goimports
-      - id: go-test
-      - id: go-vet
-      - id: gofumpt
-      - id: golint
-      - id: staticcheck
-      - id: go-mod-tidy
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v6.0.0
+      hooks:
+        - id: trailing-whitespace
+        - id: check-yaml
+        - id: end-of-file-fixer
+    - repo: https://github.com/lietu/go-pre-commit
+      rev: v1.0.0
+      hooks:
+        - id: errcheck
+        - id: go-fmt-goimports
+        - id: go-test
+        - id: go-vet
+        - id: gofumpt
+        - id: golint
+        - id: staticcheck
+        - id: go-mod-tidy
