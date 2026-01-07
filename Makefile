@@ -1,14 +1,25 @@
 PORT=5173
 
+.PHONY: all
+all: clean build
+
+.PHONY: check-go
+check-go:
+	@command -v go >/dev/null 2>&1 || { echo >&2 "Error: go is not installed."; exit 1; }
+
+.PHONY: check-tsc
+check-tsc:
+	@command -v tsc >/dev/null 2>&1 || { echo >&2 "Error: typescript is not installed."; exit 1; }
+
 .PHONY: breadport
 breadport:
 	@$(eval PORT = 80)
 
 .PHONY: frontend
-frontend:
+frontend:  check-tsc
 	cd frontend; npm run build
 
-build: main frontend
+build: check-go main frontend
 
 run:
 	PORT=$(PORT) ./main
@@ -19,4 +30,4 @@ main: main.go
 	go build $<
 
 clean:
-	rm main
+	rm -f main
