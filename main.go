@@ -3,22 +3,20 @@ package main
 import (
 	"log"
 	"os"
-
-	// "time"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
-	// "github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 )
 
 func main() {
-	// Creates a new Fiber instance.
 	app := fiber.New()
-	// app.Use(limiter.New(limiter.Config{
-	// 	Max:        5,
-	// 	Expiration: 1 * time.Second,
-	// }))
+	app.Use(limiter.New(limiter.Config{
+		Max:               5,
+		Expiration:        15 * time.Second,
+		LimiterMiddleware: limiter.SlidingWindow{},
+	}))
 
-	// https://github.com/gofiber/recipes/blob/master/react-router/cmd/react-router/main.go
 	// Folder to set up the assets
 	app.Static("/", "./frontend/dist")
 	// Fallback for React if a file failed
