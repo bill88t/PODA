@@ -7,16 +7,18 @@ all: clean build
 check-go:
 	@command -v go >/dev/null 2>&1 || { echo >&2 "Error: go is not installed."; exit 1; }
 
-.PHONY: check-tsc
-check-tsc:
-	@command -v tsc >/dev/null 2>&1 || { echo >&2 "Error: typescript is not installed."; exit 1; }
+# tsc already is running from vite
+# tsc is not global always but it is always local to node nodules
+# .PHONY: check-tsc
+# check-tsc:
+# 	@command -v frontend/node_modules/typescript/bin/tsc >/dev/null 2>&1 || { echo >&2 "Error: typescript is not installed."; exit 1; }
 
 .PHONY: breadport
 breadport:
 	@$(eval PORT = 80)
 
 .PHONY: frontend
-frontend:  check-tsc
+frontend: # check-tsc - already from vite
 	@echo "Building frontend.."
 	@cd frontend; npm run build
 

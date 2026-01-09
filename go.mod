@@ -1,6 +1,7 @@
 module main
 
-go 1.25.5
+// Please do not change from 25.3
+go 1.25.3
 
 require github.com/gofiber/fiber/v2 v2.52.10
 
