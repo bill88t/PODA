@@ -31,7 +31,7 @@ export type AuthUser = {
     password: string;
     birthday: Date;
     address: string | null;
-    appointments: Appointment [] | null;
+    appointments: Appointment [];
 };
 
 export type User = null | AuthUser;
@@ -47,7 +47,7 @@ export type UserContextType = {
             email: string, password: string,
             birthday: Date, phone: string,
             address:string | null, kind: UserKind ) => Promise<boolean>;
-    createAppointment?: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
+    createAppointment: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
     deleteAppointment?: (uuid: Uuid, id: number) => Promise<boolean>;
     viewAppointment?: (uuid: Uuid) => Promise<Appointment[] | null>
     user: User;

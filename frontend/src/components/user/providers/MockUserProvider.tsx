@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from "react";
-import { UserContext, UserKind, type AuthUser, type User } from "../userContext";
+import { AppointmentKind, UserContext, UserKind, type Appointment, type AuthUser, type User, type Uuid } from "../userContext";
 
 let uui = 1;
+let idc = 1;
 
 let users: AuthUser[] = [
     {
@@ -108,6 +109,26 @@ export function UserProvider(prop: { children: ReactNode }) {
         return false;
     }
 
+    async function createAppointment(
+uuid: Uuid, kind: AppointmentKind, datetime: Date
+    ): Promise<boolean> {
+        for (let i = 0; i < users.length; ++i) {
+            if (user && users[i].uuid === uuid) {
+                for (let j = 0; j < users[i].appointments.length; ++j) {
+                    if (users[i].appointments[j].datetime === datetime) {
+                        return false;
+                    }
+                }
+
+                const ap: Appointment = { datetime: datetime, id: idc++, kind: kind }
+
+                users[i].appointments.push(ap);
+                return true;
+            }
+        }
+        return false;
+    }
+
     return(
         <UserContext.Provider value={
             {
@@ -117,6 +138,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                 changeInfo: changeInfo,
                 changePassword: changePassword,
                 createAccount: createAccount,
+                createAppointment: createAppointment,
                 user: user,
             }
         }>
