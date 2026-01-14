@@ -129,6 +129,20 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         return false;
     }
 
+    async function deleteAppointment(uuid: Uuid, id: number): Promise<boolean> {
+        for (let i = 0; i < users.length; ++i) {
+            if (user && users[i].uuid === uuid) {
+                for (let j = 0; j < users[i].appointments.length; ++j) {
+                    if (users[i].appointments[j].id === id) {
+                            users[i].appointments.splice(j, 1);
+                            return true;
+                    }
+                }
+            }
+        }
+    return false;
+    }
+
     return(
         <UserContext.Provider value={
             {
@@ -139,6 +153,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
                 changePassword: changePassword,
                 createAccount: createAccount,
                 createAppointment: createAppointment,
+                deleteAppointment: deleteAppointment,
                 user: user,
             }
         }>

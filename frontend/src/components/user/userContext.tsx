@@ -48,7 +48,7 @@ export type UserContextType = {
             birthday: Date, phone: string,
             address:string | null, kind: UserKind ) => Promise<boolean>;
     createAppointment: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
-    deleteAppointment?: (uuid: Uuid, id: number) => Promise<boolean>;
+    deleteAppointment: (uuid: Uuid, id: number) => Promise<boolean>;
     viewAppointment?: (uuid: Uuid) => Promise<Appointment[] | null>
     user: User;
 }
