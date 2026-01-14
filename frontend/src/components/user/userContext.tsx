@@ -36,7 +36,7 @@ export type AuthUser = {
 
 export type User = null | AuthUser;
 
-export type Tuple<T, V> = [T, V];
+export type Quartet<T, V, Q, Z> = [T, V, Q, Z];
 
 export type UserContextType = {
     connect: (email: string, password: string) => Promise<boolean>,
@@ -48,10 +48,13 @@ export type UserContextType = {
             fname: string, lname: string,
             email: string, password: string,
             birthday: Date, phone: string,
-            address:string | null, kind: UserKind ) => Promise<boolean>;
+            address:string | null, kind: UserKind
+    ) => Promise<boolean>;
     createAppointment: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
     deleteAppointment: (uuid: Uuid, id: number) => Promise<boolean>;
-    viewAppointment: (uuid: Uuid, datetime: Date) => Promise<Tuple<Uuid, Appointment[]> | null>
+    viewAppointment: (
+            uuid: Uuid, datetime: Date
+    ) => Promise<Quartet<string, string, Uuid, Appointment>[] | null>
     user: User;
 }
 

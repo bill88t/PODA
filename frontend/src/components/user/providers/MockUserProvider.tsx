@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { AppointmentKind, UserContext, UserKind, type Appointment, type AuthUser, type Tuple, type User, type Uuid } from "../userContext";
+import { AppointmentKind, UserContext, UserKind, type Appointment, type AuthUser, type Quartet, type User, type Uuid } from "../userContext";
 
 let uui = 1;
 let idc = 1;
@@ -144,13 +144,18 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
     }
 
     async function viewAppointment(uuid: Uuid, datetime: Date) {
-        const app: Array<Tuple<Uuid, Appointment>> = [];
+        const app: Quartet<string, string, Uuid, Appointment>[] = [];
         if (    user && (user.kind === UserKind.client
             ||  user.kind === UserKind.admin)) {
             for (let i = 0; i < users.length; ++i) {
                 for (let j = 0; j < users[i].appointments.length; ++j) {
                     if (users[i].appointments[j].datetime >= datetime) {
-                        app.push([users[i].uuid, users[i].appointments[j]]);
+                        app.push([
+                            users[i].fname,
+                            users[i].lname,
+                            users[i].uuid,
+                            users[i].appointments[j]
+                        ]);
                     }
                 }
             }
@@ -160,13 +165,18 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
             if (user && users[i].uuid === uuid) {
                 for (let j = 0; j < users[i].appointments.length; ++j) {
                     if (users[i].appointments[j].datetime >= datetime) {
-                        app.push([uuid, users[i].appointments[j]]);
+                        app.push([
+                            users[i].fname,
+                            users[i].lname,
+                            uuid,
+                            users[i].appointments[j]
+                        ]);
                     }
                 }
                 break;
             }
         }
-        return app;
+        return null;
     }
 
     return(
