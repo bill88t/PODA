@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { AppointmentKind, UserContext, UserKind, type Appointment, type AuthUser, type User, type Uuid } from "../userContext";
+import { AppointmentKind, UserContext, UserKind, type Appointment, type AuthUser, type Tuple, type User, type Uuid } from "../userContext";
 
 let uui = 1;
 let idc = 1;
@@ -143,6 +143,32 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
     return false;
     }
 
+    async function viewAppointment(uuid: Uuid, datetime: Date) {
+        const app: Array<Tuple<Uuid, Appointment>> = [];
+        if (    user && (user.kind === UserKind.client
+            ||  user.kind === UserKind.admin)) {
+            for (let i = 0; i < users.length; ++i) {
+                for (let j = 0; j < users[i].appointments.length; ++j) {
+                    if (users[i].appointments[j].datetime >= datetime) {
+                        app.push([users[i].uuid, users[i].appointments[j]]);
+                    }
+                }
+            }
+            return app;
+        }
+        for (let i = 0; i < users.length; ++i) {
+            if (user && users[i].uuid === uuid) {
+                for (let j = 0; j < users[i].appointments.length; ++j) {
+                    if (users[i].appointments[j].datetime >= datetime) {
+                        app.push([uuid, users[i].appointments[j]]);
+                    }
+                }
+                break;
+            }
+        }
+        return app;
+    }
+
     return(
         <UserContext.Provider value={
             {
@@ -154,6 +180,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
                 createAccount: createAccount,
                 createAppointment: createAppointment,
                 deleteAppointment: deleteAppointment,
+                viewAppointment: viewAppointment,
                 user: user,
             }
         }>

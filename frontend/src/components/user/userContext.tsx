@@ -36,6 +36,8 @@ export type AuthUser = {
 
 export type User = null | AuthUser;
 
+export type Tuple<T, V> = [T, V];
+
 export type UserContextType = {
     connect: (email: string, password: string) => Promise<boolean>,
     disconnect: () => void,
@@ -49,7 +51,7 @@ export type UserContextType = {
             address:string | null, kind: UserKind ) => Promise<boolean>;
     createAppointment: (uuid: Uuid, kind: AppointmentKind, datetime: Date) => Promise<boolean>;
     deleteAppointment: (uuid: Uuid, id: number) => Promise<boolean>;
-    viewAppointment?: (uuid: Uuid) => Promise<Appointment[] | null>
+    viewAppointment: (uuid: Uuid, datetime: Date) => Promise<Tuple<Uuid, Appointment[]> | null>
     user: User;
 }
 
