@@ -24,6 +24,10 @@ frontend: # check-tsc - already from vite
 
 build: check-go main frontend
 
+npm:
+	@echo "Refreshing NPM packages"
+	@cd frontend; npm install
+
 run:
 	@echo "Running on port $PORT"
 	@PORT=$(PORT) ./main
