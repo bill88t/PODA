@@ -1,3 +1,4 @@
+import { Calendar } from "../components/Calendar";
 import { UserKind, useUser } from "../components/user/userContext";
 
 function BasicHome() {
@@ -36,6 +37,7 @@ function ClientHome() {
     return (
         <>
             <UserHome />
+            <Calendar />
         </>
     )
 }

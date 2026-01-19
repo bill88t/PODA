@@ -91,12 +91,15 @@ body
     background-color: transparent
     width: 100%
 
-  input, button
+  input, button, .field
     border-style: none
     box-shadow: rgba($shadow-color, 0.2) 0 0 12px
     padding: $form-gap
     transform: translateY(math.div(-$form-gap, 2))
     border-radius: 4px
+
+  .field
+    height: $text-size*2 + $form-gap*4
 
   button
     background-color: $button-background-color

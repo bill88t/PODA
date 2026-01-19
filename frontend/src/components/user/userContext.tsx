@@ -1,5 +1,12 @@
 import { createContext, useContext } from "react";
 
+export type AppointmentView = {
+  userUuid: Uuid;
+  fname: string;
+  lname: string;
+  appointment: Appointment;
+};
+
 export enum UserKind {
     client = "client",
     barber = "barber",
@@ -36,8 +43,6 @@ export type AuthUser = {
 
 export type User = null | AuthUser;
 
-export type Quartet<T, V, Q, Z> = [T, V, Q, Z];
-
 export type UserContextType = {
     connect: (email: string, password: string) => Promise<boolean>,
     disconnect: () => void,
@@ -54,9 +59,9 @@ export type UserContextType = {
     deleteAppointment: (uuid: Uuid, id: number) => Promise<boolean>;
     viewAppointment: (
             uuid: Uuid, datetime: Date
-    ) => Promise<Quartet<string, string, Uuid, Appointment>[] | null>
+    ) => Promise<AppointmentView[]>;
     user: User;
-}
+};
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 

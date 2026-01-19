@@ -121,11 +121,11 @@ function ChangePersonalData(prop: { flag: number; setFlag: (arg0: number) => voi
         :
         <>
             <div>First Name</div>
-            <div>{fname}</div>
+            <div className="field">{fname}</div>
             <div>Last Name</div>
-            <div>{lname}</div>
+            <div className="field">{lname}</div>
             <div>Birthday</div>
-            <div>{birthday.toISOString().split("T")[0]}</div>
+            <div className="field">{birthday.toISOString().split("T")[0]}</div>
             <button
                 className="span2"
                 onClick={
@@ -197,9 +197,9 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
         :
         <>
             <div>Email</div>
-            <div>{user.email}</div>
+            <div className="field">{user.email}</div>
             <div>Phone Number</div>
-            <div>{user.phone}</div>
+            <div className="field">{user.phone}</div>
             <button
                 className="span2"
                 onClick={
