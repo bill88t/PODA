@@ -35,7 +35,7 @@ export default function Events() {
                             f => {
                                 f.preventDefault();
                                 usrCtx.deleteAppointment(e.userUuid, e.appointment.id);
-                                setChanged(changed + 1);
+                                setChanged(changed + 1 % 8);
                             }
                         }>
                             Delete
