@@ -12,6 +12,7 @@ const SignUp = lazy(() => import("./pages/SignUp.tsx"))
 const Login = lazy(() => import("./pages/Login.tsx"))
 const Profile = lazy(() => import("./pages/Profile.tsx"))
 const NotFound = lazy(() => import("./pages/NotFound.tsx"))
+const Events = lazy(() => import("./pages/Events.tsx"))
 
 function Main() {
     const { path } = usePath();
@@ -22,20 +23,25 @@ function Main() {
             if (user === null) {
                 return <Login />
             }
-            else { 
-                history.pushState({}, "", "/");
-                return <Home />
-            };
+            history.pushState({}, "", "/");
+            return <Home />
         }
         case "/sign_up": return <SignUp />;
         case "/profile": {
             if (user !== null) {
                 return <Profile />
-            } else {
-                history.pushState({}, "", "/");
-                return <Home />
+            }
+            history.pushState({}, "", "/");
+            return <Home />
+
+        }
+        case "/events": {
+            if (user === null) {
+                history.pushState({}, "", "/login");
+                return <Login />
             }
         }
+        return <Events />
         default        : return <NotFound />;
     }
 }

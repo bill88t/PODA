@@ -7,36 +7,44 @@ export default function NavBar() {
     const noLogged = user === null;
     return (
         <div className="nav">
-            <a onClick={ e => {
+            <a onClick={e => {
                 e.preventDefault();
                 setPath("/");
-            } }>Home Page</a>
+            }}>Home Page</a>
+            {noLogged ?
+                <>
+                </>
+                :
+                <>
+                    <a onClick={e => {
+                        e.preventDefault();
+                        setPath("/events");
+                    }}>Events</a>
+                </>}
             <div className="nav-right">
-                {
-                    noLogged ?
+                {noLogged ?
                     <>
-                        <a onClick={ e => {
+                        <a onClick={e => {
                             e.preventDefault();
                             setPath("/login");
-                        } }>Login</a>
-                        <a onClick={ e => {
+                        }}>Login</a>
+                        <a onClick={e => {
                             e.preventDefault();
                             setPath("/sign_up");
-                        } }>Sign up</a>
+                        }}>Sign up</a>
                     </>
                     :
                     <>
-                        <a onClick= { e => {
+                        <a onClick={e => {
                             e.preventDefault();
                             disconnect();
                             setPath("/");
-                        } }>Log out</a>
-                        <a onClick={ e => {
+                        }}>Log out</a>
+                        <a onClick={e => {
                             e.preventDefault();
                             setPath("/profile");
-                        } }>Profile</a>
-                    </>
-                }
+                        }}>Profile</a>
+                    </>}
             </div>
         </div>
     )

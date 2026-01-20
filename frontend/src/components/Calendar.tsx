@@ -1,31 +1,37 @@
-import { useState, useEffect } from "react";
-import { useUser, type AppointmentView } from "./user/userContext.tsx"
+import { useEffect, useState } from "react";
+import { useUser, type AppointmentView } from "./user/userContext";
 
 function CalendarEvent() {
-    const ctxUsr = useUser();
-
-    if (ctxUsr.user === null) throw Error("User for Calendar must exists");
+    const usrCtx = useUser();
     const [events, setEvents] = useState<AppointmentView[]>([]);
 
     useEffect(() => {
-        (async () => {
-            setEvents(
-                await ctxUsr.viewAppointment(ctxUsr.user!.uuid, new Date())
+        if (!usrCtx.user) return;
+
+        const loadAppointments = async () => {
+            const result = await usrCtx.viewAppointment(
+                usrCtx.user!.uuid,
+                new Date()
             );
-        })();
-    }, [ctxUsr]);
+            setEvents(result);
+        };
+
+        loadAppointments();
+    }, [usrCtx, usrCtx.user]);
+
+    if (!usrCtx.user) {
+        return <div>No user loaded</div>;
+    }
 
     return (
         <div className="form">
-            {events.map(e => (
-                <>
-                    <div className="field">
-                        {e.fname} {e.lname}
-                        <br />
-                        {e.appointment.datetime.toLocaleString()}
-                    </div>
-                </>
-            ))}
+        {events.map(e => (
+            <div className="field" key={e.appointment.id}>
+                {e.fname} {e.lname}
+                <br />
+                {new Date(e.appointment.datetime).toLocaleString()}
+            </div>
+        ))}
         </div>
     );
 }
