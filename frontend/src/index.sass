@@ -107,8 +107,13 @@ body
     margin-top: math.div($form-gap, 2) // alignment
 
   input
-    color: $input-text-color
-    background-color: $input-background-color
+    :-moz-autofill,
+    :-moz-autofill-preview,
+    :-webkit-autofill
+      color: $input-text-color
+      background-color: $input-background-color
+
+
 
   h1, h2
     padding: $form-gap 0
