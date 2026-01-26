@@ -2,15 +2,15 @@ package main
 
 import (
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
-// User struct
+// User struct for API responses
 type User struct {
 	ID           string    `json:"id"`
 	Fname        string    `json:"fname"`
@@ -21,7 +21,7 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-// UserResponse struct
+// UserResponse struct for JSON output
 type UserResponse struct {
 	ID       string    `json:"id"`
 	Fname    string    `json:"fname"`
@@ -30,23 +30,31 @@ type UserResponse struct {
 	Birthday time.Time `json:"birthday"`
 }
 
-// hashPassword function
+// hashPassword hashes a password
 func hashPassword(password string) string {
 	h := sha256.New()
 	h.Write([]byte(password))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// CreateUser function
+// CreateUser inserts a new user into the database
 func CreateUser(fname, lname, email, password string, birthday time.Time) (*User, error) {
 	id := uuid.New().String()
 	passwordHash := hashPassword(password)
 
-	_, err := db.Exec(
-		"INSERT INTO users (id, fname, lname, email, password_hash, birthday) VALUES (?, ?, ?, ?, ?, ?)",
-		id, fname, lname, email, passwordHash, birthday.Format("2006-01-02"),
-	)
-	if err != nil {
+	// Convert birthday to string to match SQLite TEXT
+	bdayStr := birthday.Format("2006-01-02")
+
+	userModel := UserModel{
+		ID:           id,
+		FName:        fname,
+		LName:        lname,
+		Email:        email,
+		PasswordHash: passwordHash,
+		Birthday:     &bdayStr,
+	}
+
+	if err := db.Create(&userModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -59,56 +67,75 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 	}, nil
 }
 
-// GetUserByEmail function
+// GetUserByEmail fetches a user by email
 func GetUserByEmail(email string) (*User, error) {
-	var user User
-	var birthdayStr sql.NullString
-	var createdAt sql.NullString
-
-	err := db.QueryRow(
-		"SELECT id, fname, lname, email, password_hash, birthday, created_at FROM users WHERE email = ?",
-		email,
-	).Scan(&user.ID, &user.Fname, &user.Lname, &user.Email, &user.PasswordHash, &birthdayStr, &createdAt)
-	if err != nil {
+	var u UserModel
+	if err := db.Where("email = ?", email).First(&u).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, err
+		}
 		return nil, err
 	}
 
-	if birthdayStr.Valid {
-		user.Birthday, _ = time.Parse("2006-01-02", birthdayStr.String)
+	// Convert birthday string to time.Time
+	birthday := time.Time{}
+	if u.Birthday != nil {
+		parsed, err := time.Parse("2006-01-02", *u.Birthday)
+		if err == nil {
+			birthday = parsed
+		}
 	}
 
-	return &user, nil
+	return &User{
+		ID:           u.ID,
+		Fname:        u.FName,
+		Lname:        u.LName,
+		Email:        u.Email,
+		PasswordHash: u.PasswordHash,
+		Birthday:     birthday,
+		CreatedAt:    u.CreatedAt,
+	}, nil
 }
 
-// GetUserByID function
+// GetUserByID fetches a user by ID
 func GetUserByID(id string) (*User, error) {
-	var user User
-	var birthdayStr sql.NullString
-	var createdAt sql.NullString
-
-	err := db.QueryRow(
-		"SELECT id, fname, lname, email, password_hash, birthday, created_at FROM users WHERE id = ?",
-		id,
-	).Scan(&user.ID, &user.Fname, &user.Lname, &user.Email, &user.PasswordHash, &birthdayStr, &createdAt)
-	if err != nil {
+	var u UserModel
+	if err := db.First(&u, "id = ?", id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, err
+		}
 		return nil, err
 	}
 
-	if birthdayStr.Valid {
-		user.Birthday, _ = time.Parse("2006-01-02", birthdayStr.String)
+	birthday := time.Time{}
+	if u.Birthday != nil {
+		parsed, err := time.Parse("2006-01-02", *u.Birthday)
+		if err == nil {
+			birthday = parsed
+		}
 	}
 
-	return &user, nil
+	return &User{
+		ID:           u.ID,
+		Fname:        u.FName,
+		Lname:        u.LName,
+		Email:        u.Email,
+		PasswordHash: u.PasswordHash,
+		Birthday:     birthday,
+		CreatedAt:    u.CreatedAt,
+	}, nil
 }
 
-// EmailExists function
+// EmailExists checks if an email is already registered
 func EmailExists(email string) bool {
-	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE email = ?", email).Scan(&count)
-	return err == nil && count > 0
+	var count int64
+	if err := db.Model(&UserModel{}).Where("email = ?", email).Count(&count).Error; err != nil {
+		return false
+	}
+	return count > 0
 }
 
-// SignUp function
+// SignUp handler
 func SignUp(c *fiber.Ctx) error {
 	req := new(struct {
 		Fname    string `json:"fname"`
@@ -156,7 +183,7 @@ func SignUp(c *fiber.Ctx) error {
 	})
 }
 
-// Login function
+// Login handler
 func Login(c *fiber.Ctx) error {
 	req := new(struct {
 		Email    string `json:"email"`
@@ -192,7 +219,7 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
-// GetProfile function
+// GetProfile handler
 func GetProfile(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(string)
 

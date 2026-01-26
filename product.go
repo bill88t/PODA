@@ -5,9 +5,10 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
-// Product struct
+// Product struct stays as the API representation
 type Product struct {
 	ID    int     `json:"id"`
 	Name  string  `json:"name"`
@@ -15,46 +16,49 @@ type Product struct {
 	Price float64 `json:"price"`
 }
 
-// GetAllProducts function
+// GetAllProducts fetches all products from the database using GORM
 func GetAllProducts(c *fiber.Ctx) error {
-	rows, err := db.Query("SELECT id, name, brand, price FROM products")
-	if err != nil {
+	var dbProducts []ProductModel
+	if err := db.Find(&dbProducts).Error; err != nil {
+		log.Printf("failed to fetch products: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch products"})
 	}
-	defer func() {
-		if err := rows.Close(); err != nil {
-			log.Printf("failed to close rows: %v", err)
-		}
-	}()
 
-	var products []Product
-	for rows.Next() {
-		var p Product
-		if err := rows.Scan(&p.ID, &p.Name, &p.Brand, &p.Price); err != nil {
-			continue
+	products := make([]Product, len(dbProducts))
+	for i, p := range dbProducts {
+		products[i] = Product{
+			ID:    int(p.ID),
+			Name:  p.Name,
+			Brand: p.Brand,
+			Price: p.Price,
 		}
-		products = append(products, p)
-	}
-
-	if products == nil {
-		products = []Product{}
 	}
 
 	return c.JSON(products)
 }
 
-// GetProductByID function
+// GetProductByID fetches a single product by ID using GORM
 func GetProductByID(c *fiber.Ctx) error {
 	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid ID"})
 	}
 
-	var p Product
-	err = db.QueryRow("SELECT id, name, brand, price FROM products WHERE id = ? ", id).Scan(&p.ID, &p.Name, &p.Brand, &p.Price)
-	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+	var dbProduct ProductModel
+	if err := db.First(&dbProduct, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+		}
+		log.Printf("failed to fetch product by id: %v", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch product"})
 	}
 
-	return c.JSON(p)
+	product := Product{
+		ID:    int(dbProduct.ID),
+		Name:  dbProduct.Name,
+		Brand: dbProduct.Brand,
+		Price: dbProduct.Price,
+	}
+
+	return c.JSON(product)
 }
