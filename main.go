@@ -36,8 +36,8 @@ func main() {
 	v1 := api.Group("/v1")
 
 	// Public routes
-	v1.Get("/products", GetAllProducts)
-	v1.Get("/products/:id", GetProductByID)
+	v1.Get("/appointments", GetAllAppointments)
+	v1.Get("/appointments/:id", GetAppointmentByID)
 	v1.Post("/users/signup", SignUp)
 	v1.Post("/users/login", Login)
 

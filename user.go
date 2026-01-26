@@ -13,17 +13,18 @@ import (
 // User struct for API responses
 type User struct {
 	ID           uuid.UUID `json:"id"`
+	Kind         string    `json:"kind"`
 	Fname        string    `json:"fname"`
 	Lname        string    `json:"lname"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"-"`
 	Birthday     time.Time `json:"birthday"`
-	CreatedAt    time.Time `json:"created_at"`
 }
 
 // UserResponse struct for JSON output
 type UserResponse struct {
 	ID       uuid.UUID `json:"id"`
+	Kind     string    `json:"kind"`
 	Fname    string    `json:"fname"`
 	Lname    string    `json:"lname"`
 	Email    string    `json:"email"`
@@ -93,7 +94,6 @@ func GetUserByEmail(email string) (*User, error) {
 		Email:        u.Email,
 		PasswordHash: u.PasswordHash,
 		Birthday:     birthday,
-		CreatedAt:    u.CreatedAt,
 	}, nil
 }
 
@@ -122,7 +122,6 @@ func GetUserByID(id string) (*User, error) {
 		Email:        u.Email,
 		PasswordHash: u.PasswordHash,
 		Birthday:     birthday,
-		CreatedAt:    u.CreatedAt,
 	}, nil
 }
 

@@ -9,12 +9,14 @@ import (
 // UserModel Database type
 type UserModel struct {
 	ID           uuid.UUID `gorm:"primaryKey"`
+	Kind         string    `gorm:"not null"`
 	FName        string    `gorm:"not null"`
-	LName        string
-	Email        string `gorm:"uniqueIndex;not null"`
-	PasswordHash string `gorm:"not null"`
-	Birthday     *string
-	CreatedAt    time.Time
+	LName        string    `gorm:"not null"`
+	Email        string    `gorm:"uniqueIndex;not null"`
+	PasswordHash string    `gorm:"not null"`
+	Birthday     *string   `gorm:"not null"`
+	Address      string
+	Appointments []uuid.UUID
 }
 
 // TableName UserModel table binding
@@ -22,15 +24,14 @@ func (UserModel) TableName() string {
 	return "users"
 }
 
-// ProductModel Database type
-type ProductModel struct {
-	ID    uint    `gorm:"primaryKey;autoIncrement"`
-	Name  string  `gorm:"not null"`
-	Brand string  `gorm:"not null"`
-	Price float64 `gorm:"not null"`
+// AppointmentModel Database type
+type AppointmentModel struct {
+	ID       uuid.UUID `gorm:"primaryKey;autoIncrement"`
+	Datetime time.Time `gorm:"not null"`
+	Kind     string    `gorm:"not null"`
 }
 
-// TableName ProductModel table binding
-func (ProductModel) TableName() string {
-	return "products"
+// TableName AppointmentModel table binding
+func (AppointmentModel) TableName() string {
+	return "appointments"
 }

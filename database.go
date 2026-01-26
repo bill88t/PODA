@@ -34,16 +34,11 @@ func InitDB(dbPath string) error {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	if err := execPragmas(sqlDB); err != nil {
-		log.Printf("warning: failed to apply pragmas: %v", err)
+		log.Printf("Warning: Failed to apply pragmas: %v", err)
 	}
 
 	// Auto-migrate models
-	if err := db.AutoMigrate(&UserModel{}, &ProductModel{}); err != nil {
-		return err
-	}
-
-	// Seed initial products if needed
-	if err := seedProducts(); err != nil {
+	if err := db.AutoMigrate(&UserModel{}, &AppointmentModel{}); err != nil {
 		return err
 	}
 
@@ -66,28 +61,7 @@ func execPragmas(sqlDB *sql.DB) error {
 	}
 
 	if err := gormDB.Exec("PRAGMA journal_mode = WAL;").Error; err != nil {
-		log.Printf("warning: couldn't set journal_mode=WAL: %v", err)
-	}
-
-	return nil
-}
-
-func seedProducts() error {
-	var count int64
-	if err := db.Model(&ProductModel{}).Count(&count).Error; err != nil {
-		return err
-	}
-
-	if count == 0 {
-		products := []ProductModel{
-			{Name: "Urban Runner", Brand: "PODA", Price: 79.99},
-			{Name: "Classic Loafer", Brand: "PODA", Price: 120.50},
-			{Name: "Summer Sandal", Brand: "PODA", Price: 45.00},
-		}
-		if err := db.Create(&products).Error; err != nil {
-			return err
-		}
-		log.Println("Seeded initial products")
+		log.Printf("Warning: Couldn't set journal_mode=WAL: %v", err)
 	}
 
 	return nil
