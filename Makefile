@@ -34,9 +34,9 @@ run:
 
 breadrun: breadport | run
 
-main: main.go
+main:
 	@echo "Building backend.."
-	@go build $<
+	@go build -o main .
 
 clean:
 	@echo "Cleaning.."
