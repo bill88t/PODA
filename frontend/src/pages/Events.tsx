@@ -6,6 +6,7 @@ export default function Events() {
     if (usrCtx.user === null) throw Error("user is null in Events");
     const [events, setEvents] = useState<AppointmentView[]>([]);
     const [changed, setChanged] = useState<number>(0);
+    const [create, setCreate] = useState<boolean>(false);
 
 
     useEffect(() => {
@@ -37,12 +38,20 @@ export default function Events() {
                                 usrCtx.deleteAppointment(e.userUuid, e.appointment.id);
                                 setChanged(changed + 1 % 8);
                             }
-                        }>
-                            Delete
-                        </a></div>
+                        }>Delete</a>
+                    </div>
                 </div>
             )
             )}
+            <button className="span2"
+                onClick={
+                    f => {
+                        f.preventDefault();
+                        setCreate(!create);
+                    }
+                }
+                id="create-appointment"
+            >{create ?  "Abort" : "Create"}</button>
         </>
     )
 }
