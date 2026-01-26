@@ -1,11 +1,15 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // UserModel Database type
 type UserModel struct {
-	ID           string `gorm:"primaryKey"`
-	FName        string `gorm:"not null"`
+	ID           uuid.UUID `gorm:"primaryKey"`
+	FName        string    `gorm:"not null"`
 	LName        string
 	Email        string `gorm:"uniqueIndex;not null"`
 	PasswordHash string `gorm:"not null"`

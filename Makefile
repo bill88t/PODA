@@ -39,5 +39,31 @@ main:
 	@go build -o main .
 
 clean:
-	@echo "Cleaning.."
+	@echo "Cleaning build.."
 	@rm -f main
+
+full_clean: rmdb clean
+
+rmdb:
+	@echo "Wiping database.."
+	@rm -v poda.db-wal 2>/dev/null || true
+	@rm -v poda.db-shm 2>/dev/null || true
+	@rm -v poda.db 2>/dev/null || true
+
+test_bill_reg:
+	@echo "Registering bill88t.."
+	curl -X POST http://localhost:5173/api/v1/users/signup \
+	  -H "Content-Type: application/json" \
+	  -d '{"fname": "Bill", "lname": "Sideris", "email": "bill88t@feline.gr", "password": "securepassword123", "birthday": "2002-12-01" }'
+	@echo
+	@echo
+
+test_bill_login:
+	@echo "Testing login.."
+	curl -X POST http://localhost:5173/api/v1/users/login \
+	  -H "Content-Type: application/json" \
+	  -d '{ "email":  "bill88t@feline.gr", "password": "securepassword123" }'
+	@echo
+	@echo
+
+runtests: test_bill_reg test_bill_login

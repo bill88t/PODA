@@ -7,6 +7,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 var jwtSecret []byte
@@ -21,13 +22,13 @@ func init() {
 
 // Claims struct
 type Claims struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
+	UserID uuid.UUID `json:"user_id"`
+	Email  string    `json:"email"`
 	jwt.RegisteredClaims
 }
 
 // GenerateToken function
-func GenerateToken(userID, email string) (string, error) {
+func GenerateToken(userID uuid.UUID, email string) (string, error) {
 	claims := Claims{
 		UserID: userID,
 		Email:  email,

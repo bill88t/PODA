@@ -12,7 +12,7 @@ import (
 
 // User struct for API responses
 type User struct {
-	ID           string    `json:"id"`
+	ID           uuid.UUID `json:"id"`
 	Fname        string    `json:"fname"`
 	Lname        string    `json:"lname"`
 	Email        string    `json:"email"`
@@ -23,7 +23,7 @@ type User struct {
 
 // UserResponse struct for JSON output
 type UserResponse struct {
-	ID       string    `json:"id"`
+	ID       uuid.UUID `json:"id"`
 	Fname    string    `json:"fname"`
 	Lname    string    `json:"lname"`
 	Email    string    `json:"email"`
@@ -39,7 +39,7 @@ func hashPassword(password string) string {
 
 // CreateUser inserts a new user into the database
 func CreateUser(fname, lname, email, password string, birthday time.Time) (*User, error) {
-	id := uuid.New().String()
+	id := uuid.New()
 	passwordHash := hashPassword(password)
 
 	// Convert birthday to string to match SQLite TEXT
