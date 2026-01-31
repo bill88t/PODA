@@ -12,23 +12,29 @@ import (
 
 // User struct for API responses
 type User struct {
-	ID           uuid.UUID `json:"id"`
-	Kind         string    `json:"kind"`
-	Fname        string    `json:"fname"`
-	Lname        string    `json:"lname"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"-"`
-	Birthday     time.Time `json:"birthday"`
+	ID           uuid.UUID     `json:"id"`
+	Kind         string        `json:"kind"`
+	Fname        string        `json:"fname"`
+	Lname        string        `json:"lname"`
+	Email        string        `json:"email"`
+	Phone        string        `json:"phone"`
+	PasswordHash string        `json:"-"`
+	Birthday     time.Time     `json:"birthday"`
+	Address      string        `json:"address"`
+	Appointments []Appointment `json:"appointments"`
 }
 
 // UserResponse struct for JSON output
 type UserResponse struct {
-	ID       uuid.UUID `json:"id"`
-	Kind     string    `json:"kind"`
-	Fname    string    `json:"fname"`
-	Lname    string    `json:"lname"`
-	Email    string    `json:"email"`
-	Birthday time.Time `json:"birthday"`
+	ID           uuid.UUID     `json:"id"`
+	Kind         string        `json:"kind"`
+	Fname        string        `json:"fname"`
+	Lname        string        `json:"lname"`
+	Email        string        `json:"email"`
+	Phone        string        `json:"phone"`
+	Birthday     time.Time     `json:"birthday"`
+	Address      string        `json:"address"`
+	Appointments []Appointment `json:"appointments"`
 }
 
 // hashPassword hashes a password
@@ -48,6 +54,7 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 
 	userModel := UserModel{
 		ID:           id,
+		Kind:         "client",
 		FName:        fname,
 		LName:        lname,
 		Email:        email,
@@ -60,18 +67,20 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 	}
 
 	return &User{
-		ID:       id,
-		Fname:    fname,
-		Lname:    lname,
-		Email:    email,
-		Birthday: birthday,
+		ID:           id,
+		Kind:         "client",
+		Fname:        fname,
+		Lname:        lname,
+		Email:        email,
+		Birthday:     birthday,
+		Appointments: []Appointment{},
 	}, nil
 }
 
 // GetUserByEmail fetches a user by email
 func GetUserByEmail(email string) (*User, error) {
 	var u UserModel
-	if err := db.Where("email = ?", email).First(&u).Error; err != nil {
+	if err := db.Preload("Appointments").Where("email = ?", email).First(&u).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, err
 		}
@@ -87,20 +96,33 @@ func GetUserByEmail(email string) (*User, error) {
 		}
 	}
 
+	appointments := make([]Appointment, len(u.Appointments))
+	for i, a := range u.Appointments {
+		appointments[i] = Appointment{
+			ID:       a.ID,
+			Datetime: a.Datetime,
+			Kind:     a.Kind,
+		}
+	}
+
 	return &User{
 		ID:           u.ID,
+		Kind:         u.Kind,
 		Fname:        u.FName,
 		Lname:        u.LName,
 		Email:        u.Email,
+		Phone:        u.Phone,
 		PasswordHash: u.PasswordHash,
 		Birthday:     birthday,
+		Address:      u.Address,
+		Appointments: appointments,
 	}, nil
 }
 
 // GetUserByID fetches a user by ID
 func GetUserByID(id string) (*User, error) {
 	var u UserModel
-	if err := db.First(&u, "id = ?", id).Error; err != nil {
+	if err := db.Preload("Appointments").First(&u, "id = ?", id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, err
 		}
@@ -115,13 +137,26 @@ func GetUserByID(id string) (*User, error) {
 		}
 	}
 
+	appointments := make([]Appointment, len(u.Appointments))
+	for i, a := range u.Appointments {
+		appointments[i] = Appointment{
+			ID:       a.ID,
+			Datetime: a.Datetime,
+			Kind:     a.Kind,
+		}
+	}
+
 	return &User{
 		ID:           u.ID,
+		Kind:         u.Kind,
 		Fname:        u.FName,
 		Lname:        u.LName,
 		Email:        u.Email,
+		Phone:        u.Phone,
 		PasswordHash: u.PasswordHash,
 		Birthday:     birthday,
+		Address:      u.Address,
+		Appointments: appointments,
 	}, nil
 }
 
@@ -172,11 +207,15 @@ func SignUp(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"user": UserResponse{
-			ID:       user.ID,
-			Fname:    user.Fname,
-			Lname:    user.Lname,
-			Email:    user.Email,
-			Birthday: user.Birthday,
+			ID:           user.ID,
+			Kind:         user.Kind,
+			Fname:        user.Fname,
+			Lname:        user.Lname,
+			Email:        user.Email,
+			Phone:        user.Phone,
+			Birthday:     user.Birthday,
+			Address:      user.Address,
+			Appointments: []Appointment{},
 		},
 		"token": token,
 	})
@@ -208,11 +247,15 @@ func Login(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"user": UserResponse{
-			ID:       user.ID,
-			Fname:    user.Fname,
-			Lname:    user.Lname,
-			Email:    user.Email,
-			Birthday: user.Birthday,
+			ID:           user.ID,
+			Kind:         user.Kind,
+			Fname:        user.Fname,
+			Lname:        user.Lname,
+			Email:        user.Email,
+			Phone:        user.Phone,
+			Birthday:     user.Birthday,
+			Address:      user.Address,
+			Appointments: user.Appointments,
 		},
 		"token": token,
 	})
@@ -220,18 +263,22 @@ func Login(c *fiber.Ctx) error {
 
 // GetProfile handler
 func GetProfile(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(string)
+	userID := c.Locals("userID").(uuid.UUID)
 
-	user, err := GetUserByID(userID)
+	user, err := GetUserByID(userID.String())
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
 
 	return c.JSON(UserResponse{
-		ID:       user.ID,
-		Fname:    user.Fname,
-		Lname:    user.Lname,
-		Email:    user.Email,
-		Birthday: user.Birthday,
+		ID:           user.ID,
+		Kind:         user.Kind,
+		Fname:        user.Fname,
+		Lname:        user.Lname,
+		Email:        user.Email,
+		Phone:        user.Phone,
+		Birthday:     user.Birthday,
+		Address:      user.Address,
+		Appointments: user.Appointments,
 	})
 }

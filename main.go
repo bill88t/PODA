@@ -26,7 +26,7 @@ func main() {
 	}))
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://0.0.0.0:5173",
+		AllowOrigins: "http://0.0.0.0:5174",
 		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
 	}))
 
@@ -36,22 +36,29 @@ func main() {
 	v1 := api.Group("/v1")
 
 	// Public routes
-	v1.Get("/appointments", GetAllAppointments)
-	v1.Get("/appointments/:id", GetAppointmentByID)
 	v1.Post("/users/signup", SignUp)
 	v1.Post("/users/login", Login)
 
 	// Protected routes
-	protected := v1.Group("/protected")
+	protected := v1.Group("/profile")
 	protected.Use(AuthMiddleware)
-	protected.Get("/profile", GetProfile)
+
+	protected.Get("/", GetProfile)
+
+	// Appointments for the current user
+	appointments := protected.Group("/appointments")
+	appointments.Get("/", GetUserAppointments)
+	appointments.Get("/:id", GetUserAppointmentByID)
+	appointments.Post("/", CreateAppointment)
+	appointments.Put("/:id", UpdateAppointment)
+	appointments.Delete("/:id", DeleteAppointment)
 
 	app.Static("/", "./frontend/dist")
 	app.Get("*", func(c *fiber.Ctx) error { return c.SendFile("./frontend/dist/index.html") })
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "5173"
+		port = "5174"
 	}
 
 	log.Printf("Server starting on port %s", port)
