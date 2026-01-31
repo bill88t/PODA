@@ -1,3 +1,5 @@
+PREFIX := $(or $(PREFIX), )
+
 PORT=5173
 
 .PHONY: all
@@ -63,13 +65,13 @@ test_bill_login:
 	@curl -s -X POST http://localhost:5173/api/v1/users/login \
 	  -H "Content-Type: application/json" \
 	  -d '{ "email":  "bill88t@feline.gr", "password": "securepassword123" }' \
-	  | tee /tmp/login_response.json
+	  | tee /$(PREFIX)/tmp/login_response.json
 	@echo
 	@echo
 
 test_bill_profile:
 	@echo "Getting profile.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -s -X GET http://localhost:5173/api/v1/profile/ \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
@@ -99,18 +101,18 @@ test_bill_invalid_login:
 
 test_bill_create_appointment:
 	@echo "Creating appointment.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -s -X POST http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
 	  -d '{"datetime": "2026-02-15T10:00:00Z", "kind": "haircut"}' \
-	  | tee /tmp/appointment_response.json
+	  | tee /$(PREFIX)/tmp/appointment_response.json
 	@echo
 	@echo
 
 test_bill_get_appointments:
 	@echo "Getting all appointments.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -s -X GET http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
@@ -118,8 +120,8 @@ test_bill_get_appointments:
 
 test_bill_get_appointment_by_id:
 	@echo "Getting appointment by ID.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
-	@$(eval APPT_ID=$(shell jq -r '.id' /tmp/appointment_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
+	@$(eval APPT_ID=$(shell jq -r '.id' /$(PREFIX)/tmp/appointment_response.json))
 	@curl -s -X GET http://localhost:5173/api/v1/profile/appointments/$(APPT_ID) \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
@@ -127,8 +129,8 @@ test_bill_get_appointment_by_id:
 
 test_bill_update_appointment:
 	@echo "Updating appointment.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
-	@$(eval APPT_ID=$(shell jq -r '.id' /tmp/appointment_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
+	@$(eval APPT_ID=$(shell jq -r '.id' /$(PREFIX)/tmp/appointment_response.json))
 	@curl -s -X PUT http://localhost:5173/api/v1/profile/appointments/$(APPT_ID) \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
@@ -138,8 +140,8 @@ test_bill_update_appointment:
 
 test_bill_delete_appointment:
 	@echo "Deleting appointment.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
-	@$(eval APPT_ID=$(shell jq -r '.id' /tmp/appointment_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
+	@$(eval APPT_ID=$(shell jq -r '.id' /$(PREFIX)/tmp/appointment_response.json))
 	@curl -s -X DELETE http://localhost:5173/api/v1/profile/appointments/$(APPT_ID) \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
@@ -147,7 +149,7 @@ test_bill_delete_appointment:
 
 test_bill_create_second_appointment:
 	@echo "Creating second appointment for testing.."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -s -X POST http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
@@ -157,7 +159,7 @@ test_bill_create_second_appointment:
 
 test_bill_appointment_not_found:
 	@echo "Testing get non-existent appointment (should fail).."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -X GET http://localhost:5173/api/v1/profile/appointments/99999 \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
@@ -173,7 +175,7 @@ test_bill_appointment_no_auth:
 
 test_bill_invalid_appointment:
 	@echo "Testing create appointment with invalid data (should fail).."
-	@$(eval TOKEN=$(shell jq -r '.token' /tmp/login_response.json))
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -X POST http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
