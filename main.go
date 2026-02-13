@@ -53,12 +53,14 @@ func main() {
 	appointments.Put("/:id", UpdateAppointment)
 	appointments.Delete("/:id", DeleteAppointment)
 
-	app.Static("/", "./frontend/dist")
+	app.Static("/", "./frontend/dist", fiber.Static{
+		Compress: true,
+	})
 	app.Get("*", func(c *fiber.Ctx) error { return c.SendFile("./frontend/dist/index.html") })
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "5174"
+		port = "5173"
 	}
 
 	log.Printf("Server starting on port %s", port)
