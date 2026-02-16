@@ -4,9 +4,10 @@ import {
     AppointmentKind,
     UserContext,
     UserKind,
-    useUser,
+    // useUser,
     type Appointment,
     type AppointmentView,
+    type AuthUser,
     type User,
     type Uuid
 } from "../userContext";
@@ -14,7 +15,7 @@ import {
 
 export function UserProvider(prop: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const userCtx = useUser();
+    // const userCtx = useUser();
     const [jwt, setJwt] = useState<string | null>();
 
     async function connect(email: string, password: string): Promise<boolean> {
@@ -23,7 +24,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-            "https://localhost:5173/api/v1/users/login",
+             location.origin + "/api/v1/users/login",
             {
                 method: "POST",
                 body: JSON.stringify({
@@ -38,17 +39,19 @@ export function UserProvider(prop: { children: ReactNode }) {
 
         const data = await res.json();
         const headers = res.headers;
-        const auth = headers.get("authorization");
+        const auth = headers.get("Authorization");
         setJwt(auth);
 
-        user!.email    = email;
-        user!.kind     = data.kind;
-        user!.uuid     = data.id;
-        user!.fname    = data.fname;
-        user!.lname    = data.lname;
-        user!.phone    = data.phone;
-        user!.birthday = data.birthday;
-        user!.address  = data.address;
+        setUser({
+            email    : email as string,
+            kind     : data.kind as UserKind,
+            uuid     : data.id as number,
+            fname    : data.fname as string,
+            lname    : data.lname as string,
+            phone    : data.phone as string,
+            birthday : new Date(data.birthday),
+            address  : data.address as string,
+        } as AuthUser);
 
         return true;
 
@@ -59,21 +62,26 @@ export function UserProvider(prop: { children: ReactNode }) {
     }
 
     async function changeContact(email: string, phone? : string): Promise<boolean> {
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].email === user.email) {
-                users[i].email = email;
-                break;
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
+
+        const res = await fetch(
+            location.origin + "/api/v1/users/signup", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: user!.uuid,
+                    email: email,
+                    phone: phone,
+                }),
+                headers: reqHeaders,
             }
-        }
-        if (user) {
-            let u = {...user, email: email};
-            if (phone !== undefined) {
-                u = {...user, phone: phone};
-            }
-            setUser(u);
-            return true;
-        }
-        return false;
+        );
+        if (res.status >= 300) return false;
+
+        setUser({...user, phone: phone} as AuthUser);
+
+        return true;
     }
 
     async function changeInfo(
