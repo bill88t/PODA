@@ -40,7 +40,9 @@ fi
 if [ ! -f "$ENV_FILE" ]; then
     echo "Generating $ENV_FILE"
     MARIADB_ROOT_PASSWORD=$(openssl rand -base64 24)
+    echo "[MARIADB] ROOT PASSWD: ${MARIADB_ROOT_PASSWORD}"
     MARIADB_PASSWORD=$(openssl rand -base64 24)
+    echo "[MARIADB] USER PASSWD: ${MARIADB_PASSWORD}"
 
     cat > "$ENV_FILE" <<EOF
 MARIADB_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
