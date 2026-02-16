@@ -1,8 +1,11 @@
-package main
+package handlers
 
 import (
 	"log"
 	"time"
+
+	"main/drivers"
+	model "main/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -24,8 +27,8 @@ func GetUserAppointments(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
-	var appointments []AppointmentModel
-	if err := db.Where("user_id = ?", userUUID).Find(&appointments).Error; err != nil {
+	var appointments []model.AppointmentModel
+	if err := drivers.Db.Where("user_id = ?", userUUID).Find(&appointments).Error; err != nil {
 		log.Printf("failed to fetch appointments: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
 	}
@@ -52,8 +55,8 @@ func GetUserAppointmentByID(c *fiber.Ctx) error {
 
 	appointmentID := c.Params("id")
 
-	var appointment AppointmentModel
-	if err := db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	var appointment model.AppointmentModel
+	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}
@@ -93,13 +96,13 @@ func CreateAppointment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid datetime format"})
 	}
 
-	appointment := AppointmentModel{
+	appointment := model.AppointmentModel{
 		UserID:   userUUID,
 		Datetime: datetime,
 		Kind:     req.Kind,
 	}
 
-	if err := db.Create(&appointment).Error; err != nil {
+	if err := drivers.Db.Create(&appointment).Error; err != nil {
 		log.Printf("failed to create appointment: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create appointment"})
 	}
@@ -121,8 +124,8 @@ func UpdateAppointment(c *fiber.Ctx) error {
 
 	appointmentID := c.Params("id")
 
-	var appointment AppointmentModel
-	if err := db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	var appointment model.AppointmentModel
+	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}
@@ -149,7 +152,7 @@ func UpdateAppointment(c *fiber.Ctx) error {
 		appointment.Kind = req.Kind
 	}
 
-	if err := db.Save(&appointment).Error; err != nil {
+	if err := drivers.Db.Save(&appointment).Error; err != nil {
 		log.Printf("failed to update appointment: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update appointment"})
 	}
@@ -171,15 +174,15 @@ func DeleteAppointment(c *fiber.Ctx) error {
 
 	appointmentID := c.Params("id")
 
-	var appointment AppointmentModel
-	if err := db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	var appointment model.AppointmentModel
+	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointment"})
 	}
 
-	if err := db.Delete(&appointment).Error; err != nil {
+	if err := drivers.Db.Delete(&appointment).Error; err != nil {
 		log.Printf("failed to delete appointment: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete appointment"})
 	}

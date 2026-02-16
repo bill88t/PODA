@@ -1,29 +1,31 @@
-package main
+package drivers
 
 import (
 	"database/sql"
 	"log"
 	"time"
 
+	model "main/models"
+
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-var db *gorm.DB
+var Db *gorm.DB
 
 // InitDB opens the sqlite database, configures the underlying pool/pragmas,
 // runs AutoMigrate for models, and seeds initial products
 func InitDB(dbPath string) error {
 	var err error
-	db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
+	Db, err = gorm.Open(sqlite.Open(dbPath), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
 		return err
 	}
 
-	sqlDB, err := db.DB()
+	sqlDB, err := Db.DB()
 	if err != nil {
 		return err
 	}
@@ -38,7 +40,10 @@ func InitDB(dbPath string) error {
 	}
 
 	// Auto-migrate models
-	if err := db.AutoMigrate(&UserModel{}, &AppointmentModel{}); err != nil {
+	if err := Db.AutoMigrate(
+		&model.UserModel{},
+		&model.AppointmentModel{},
+	); err != nil {
 		return err
 	}
 
@@ -69,16 +74,16 @@ func execPragmas(sqlDB *sql.DB) error {
 
 // GetDB returns the gorm DB handle
 func GetDB() *gorm.DB {
-	return db
+	return Db
 }
 
 // CloseDB closes the underlying database/sql DB
 func CloseDB() {
-	if db == nil {
+	if Db == nil {
 		return
 	}
 
-	sqlDB, err := db.DB()
+	sqlDB, err := Db.DB()
 	if err != nil {
 		log.Printf("error getting sql.DB: %v", err)
 		return

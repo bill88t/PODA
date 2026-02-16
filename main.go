@@ -5,6 +5,9 @@ import (
 	"os"
 	"time"
 
+	"main/drivers"
+	"main/handlers"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -12,10 +15,10 @@ import (
 )
 
 func main() {
-	if err := InitDB("./poda.db"); err != nil {
+	if err := drivers.InitDB("./poda.db"); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
-	defer CloseDB()
+	defer drivers.CloseDB()
 
 	app := fiber.New()
 
@@ -36,22 +39,22 @@ func main() {
 	v1 := api.Group("/v1")
 
 	// Public routes
-	v1.Post("/users/signup", SignUp)
-	v1.Post("/users/login", Login)
+	v1.Post("/users/signup", handlers.SignUp)
+	v1.Post("/users/login", handlers.Login)
 
 	// Protected routes
 	protected := v1.Group("/profile")
-	protected.Use(AuthMiddleware)
+	protected.Use(handlers.AuthMiddleware)
 
-	protected.Get("/", GetProfile)
+	protected.Get("/", handlers.GetProfile)
 
 	// Appointments for the current user
 	appointments := protected.Group("/appointments")
-	appointments.Get("/", GetUserAppointments)
-	appointments.Get("/:id", GetUserAppointmentByID)
-	appointments.Post("/", CreateAppointment)
-	appointments.Put("/:id", UpdateAppointment)
-	appointments.Delete("/:id", DeleteAppointment)
+	appointments.Get("/", handlers.GetUserAppointments)
+	appointments.Get("/:id", handlers.GetUserAppointmentByID)
+	appointments.Post("/", handlers.CreateAppointment)
+	appointments.Put("/:id", handlers.UpdateAppointment)
+	appointments.Delete("/:id", handlers.DeleteAppointment)
 
 	app.Static("/", "./frontend/dist", fiber.Static{
 		Compress: true,

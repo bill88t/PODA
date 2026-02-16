@@ -1,9 +1,12 @@
-package main
+package handlers
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
 	"time"
+
+	"main/drivers"
+	model "main/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -52,7 +55,7 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 	// Convert birthday to string to match SQLite TEXT
 	bdayStr := birthday.Format("2006-01-02")
 
-	userModel := UserModel{
+	userModel := model.UserModel{
 		ID:           id,
 		Kind:         "client",
 		FName:        fname,
@@ -62,7 +65,7 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 		Birthday:     &bdayStr,
 	}
 
-	if err := db.Create(&userModel).Error; err != nil {
+	if err := drivers.Db.Create(&userModel).Error; err != nil {
 		return nil, err
 	}
 
@@ -79,8 +82,8 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 
 // GetUserByEmail fetches a user by email
 func GetUserByEmail(email string) (*User, error) {
-	var u UserModel
-	if err := db.Preload("Appointments").Where("email = ?", email).First(&u).Error; err != nil {
+	var u model.UserModel
+	if err := drivers.Db.Preload("Appointments").Where("email = ?", email).First(&u).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, err
 		}
@@ -121,8 +124,8 @@ func GetUserByEmail(email string) (*User, error) {
 
 // GetUserByID fetches a user by ID
 func GetUserByID(id string) (*User, error) {
-	var u UserModel
-	if err := db.Preload("Appointments").First(&u, "id = ?", id).Error; err != nil {
+	var u model.UserModel
+	if err := drivers.Db.Preload("Appointments").First(&u, "id = ?", id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, err
 		}
@@ -163,7 +166,9 @@ func GetUserByID(id string) (*User, error) {
 // EmailExists checks if an email is already registered
 func EmailExists(email string) bool {
 	var count int64
-	if err := db.Model(&UserModel{}).Where("email = ?", email).Count(&count).Error; err != nil {
+	if err := drivers.Db.Model(
+		&model.UserModel{},
+	).Where("email = ?", email).Count(&count).Error; err != nil {
 		return false
 	}
 	return count > 0
