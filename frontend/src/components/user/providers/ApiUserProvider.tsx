@@ -67,7 +67,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/api/v1/users/signup", {
+            location.origin + "/api/v1/users/changecontact", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: user!.uuid,
@@ -87,37 +87,52 @@ export function UserProvider(prop: { children: ReactNode }) {
     async function changeInfo(
         fname: string, lname: string, birthday: Date
     ): Promise<boolean> {
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].email === user.email) {
-                users[i].fname = fname;
-                users[i].lname = lname;
-                users[i].birthday = birthday;
-            }
-        }
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
 
-        if (user) {
-            const u = {...user, fname: fname,
-                        lname: lname, birthday: birthday};
-            setUser(u);
-            return true;
-        }
-        return false;
+        const res = await fetch(
+            location.origin + "/api/v1/users/changeinfo", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: user!.uuid,
+                    fname:fname,
+                    lname:lname,
+                    birthday: birthday.toString().split("T")[0],
+                }),
+                headers: reqHeaders,
+            }
+        );
+        if (res.status >= 300) return false;
+
+        setUser({
+            ...user,
+            fname: fname,
+            lname: lname,
+            birthday: birthday
+        } as AuthUser);
+
+        return true;
     }
 
     async function changePassword(password: string): Promise<boolean> {
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].email === user.email) {
-                users[i].password = password;
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
+
+        const res = await fetch(
+            location.origin + "/api/v1/users/changepassword", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: user!.uuid,
+                    password: password
+                }),
+                headers: reqHeaders,
             }
-        }
+        );
+        if (res.status >= 300) return false;
 
-        if (user) {
-            const u = {...user, password: password};
-            setUser(u);
-            return true;
-        }
-        return false;
-
+        return true;
     }
 
     async function createAccount (
@@ -126,16 +141,32 @@ export function UserProvider(prop: { children: ReactNode }) {
         birthday: Date, phone: string, address: string | null,
         kind: UserKind
     ): Promise<boolean> {
-        const u = {fname: fname, lname: lname, email: email,
-        password: password, birthday: birthday, phone: phone,
-        address: address, kind: kind, uuid: uui++,
-        appointments: []}
-        if( users.filter(us => us.email == email).length == 0 ) {
-            users = [...users, u];
-            setUser(u);
-            return true;
-        }
-        return false;
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+
+        const res = await fetch(
+            location.origin + "/api/v1/users/createaccount", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: user!.uuid,
+                    fname:fname,
+                    lname:lname,
+                    email: email,
+                    password: password,
+                    address: address,
+                    kind: kind,
+                    birthday: birthday.toString().split("T")[0],
+                }),
+                headers: reqHeaders,
+            }
+        );
+        if (res.status >= 300) return false;
+
+        const resp = await res.json() as AuthUser;
+
+        setUser(resp as AuthUser);
+
+        return true;
     }
 
     async function createAppointment(
