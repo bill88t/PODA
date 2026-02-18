@@ -72,11 +72,6 @@ func execPragmas(sqlDB *sql.DB) error {
 	return nil
 }
 
-// GetDB returns the gorm DB handle
-func GetDB() *gorm.DB {
-	return Db
-}
-
 // CloseDB closes the underlying database/sql DB
 func CloseDB() {
 	if Db == nil {

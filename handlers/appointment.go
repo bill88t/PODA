@@ -20,17 +20,17 @@ type Appointment struct {
 }
 
 // GetUserAppointments fetches all appointments for the authenticated user
-func GetUserAppointments(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uuid.UUID)
+func GetUserAppointments(ctx *fiber.Ctx) error {
+	userID := ctx.Locals("userID").(uuid.UUID)
 	userUUID, err := uuid.Parse(userID.String())
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
 	}
 
 	var appointments []model.AppointmentModel
 	if err := drivers.Db.Where("user_id = ?", userUUID).Find(&appointments).Error; err != nil {
 		log.Printf("failed to fetch appointments: %v", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
 	}
 
 	result := make([]Appointment, len(appointments))
@@ -42,7 +42,7 @@ func GetUserAppointments(c *fiber.Ctx) error {
 		}
 	}
 
-	return c.JSON(result)
+	return ctx.JSON(result)
 }
 
 // GetUserAppointmentByID fetches a single appointment by ID for the authenticated user

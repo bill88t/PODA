@@ -45,7 +45,7 @@ func GenerateToken(userID uuid.UUID, email string) (string, error) {
 
 // ValidateToken function
 func ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (any, error) {
 		return jwtSecret, nil
 	})
 	if err != nil {
@@ -60,24 +60,24 @@ func ValidateToken(tokenString string) (*Claims, error) {
 }
 
 // AuthMiddleware function
-func AuthMiddleware(c *fiber.Ctx) error {
-	authHeader := c.Get("Authorization")
+func AuthMiddleware(ctx *fiber.Ctx) error {
+	authHeader := ctx.Get("Authorization")
 	if authHeader == "" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing authorization header"})
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Missing authorization header"})
 	}
 
 	tokenParts := strings.Split(authHeader, " ")
 	if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid authorization format"})
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid authorization format"})
 	}
 
 	claims, err := ValidateToken(tokenParts[1])
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired token"})
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Invalid or expired token"})
 	}
 
-	c.Locals("userID", claims.UserID)
-	c.Locals("email", claims.Email)
+	ctx.Locals("userID", claims.UserID)
+	ctx.Locals("email", claims.Email)
 
-	return c.Next()
+	return ctx.Next()
 }
