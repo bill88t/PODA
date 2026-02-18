@@ -4,8 +4,6 @@ import {
     AppointmentKind,
     UserContext,
     UserKind,
-    // useUser,
-    type Appointment,
     type AppointmentView,
     type AuthUser,
     type User,
@@ -152,6 +150,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                     fname:fname,
                     lname:lname,
                     email: email,
+                    phone: phone,
                     password: password,
                     address: address,
                     kind: kind,
@@ -172,71 +171,66 @@ export function UserProvider(prop: { children: ReactNode }) {
     async function createAppointment(
 uuid: Uuid, kind: AppointmentKind, datetime: Date
     ): Promise<boolean> {
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].uuid === uuid) {
-                for (let j = 0; j < users[i].appointments.length; ++j) {
-                    if (users[i].appointments[j].datetime === datetime) {
-                        return false;
-                    }
-                }
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
 
-                const ap: Appointment = { datetime: datetime, id: idc++, kind: kind }
-
-                users[i].appointments.push(ap);
-                return true;
+        const res = await fetch(
+            location.origin + "/api/v1/users/changepassword", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: uuid,
+                    kind: kind,
+                    datetime: datetime,
+                }),
+                headers: reqHeaders,
             }
-        }
-        return false;
+        );
+        if (res.status >= 300) return false;
+
+        return true;
     }
 
     async function deleteAppointment(uuid: Uuid, id: number): Promise<boolean> {
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].uuid === uuid) {
-                for (let j = 0; j < users[i].appointments.length; ++j) {
-                    if (users[i].appointments[j].id === id) {
-                            users[i].appointments.splice(j, 1);
-                            return true;
-                    }
-                }
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
+
+        const res = await fetch(
+            location.origin + "/api/v1/users/changepassword", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: uuid,
+                    id: id,
+                }),
+                headers: reqHeaders,
             }
-        }
-    return false;
+        );
+        if (res.status >= 300) return false;
+
+        return true;
     }
 
-    async function viewAppointment(uuid: Uuid, datetime: Date) {
-        const app: AppointmentView[] = [];
-        if (    user && (user.kind === UserKind.client
-            ||  user.kind === UserKind.admin)) {
-            for (let i = 0; i < users.length; ++i) {
-                for (let j = 0; j < users[i].appointments.length; ++j) {
-                    if (users[i].appointments[j].datetime >= datetime) {
-                        app.push({
-                            fname: users[i].fname,
-                            lname: users[i].lname,
-                            userUuid: users[i].uuid,
-                            appointment: users[i].appointments[j]
-                        });
-                    }
-                }
+    async function viewAppointment(uuid: Uuid, datetime: Date): Promise<AppointmentView[]> {
+        const reqHeaders = new Headers();
+        reqHeaders.append("Content-Type", "application/json");
+        reqHeaders.append("Authorization", jwt as string);
+
+        const res = await fetch(
+            location.origin + "/api/v1/users/viewappointment", {
+                method: "POST",
+                body: JSON.stringify({
+                    uuid: uuid,
+                    datetime: datetime,
+                }),
+                headers: reqHeaders,
             }
-            return app;
-        }
-        for (let i = 0; i < users.length; ++i) {
-            if (user && users[i].uuid === uuid) {
-                for (let j = 0; j < users[i].appointments.length; ++j) {
-                    if (users[i].appointments[j].datetime >= datetime) {
-                        app.push({
-                            fname: users[i].fname,
-                            lname: users[i].lname,
-                            userUuid: uuid,
-                            appointment: users[i].appointments[j]
-                        });
-                    }
-                }
-                break;
-            }
-        }
-        return app;
+        );
+        if (res.status >= 300) return [];
+
+        const resp = res.json() as Promise<AppointmentView[]>;
+
+        return resp;
     }
 
     return(
