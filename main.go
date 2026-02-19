@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	_ "main/drivers"
 	drivers "main/drivers/sqlite"
 	"main/handlers"
 

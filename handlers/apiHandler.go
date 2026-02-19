@@ -9,7 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func ApiHandler(app *fiber.App) {
+func ApiHandler(app *fiber.App) *fiber.App {
 	app.Use(limiter.New(limiter.Config{
 		Max:               15,
 		Expiration:        15 * time.Second,
@@ -43,4 +43,6 @@ func ApiHandler(app *fiber.App) {
 	appointments.Post("/", CreateAppointment)
 	appointments.Put("/:id", UpdateAppointment)
 	appointments.Delete("/:id", DeleteAppointment)
+
+	return app
 }
