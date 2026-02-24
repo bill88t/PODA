@@ -1,29 +1,19 @@
 package handlers
 
 import (
-	"time"
+	"main/middleware"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func ApiHandler(app *fiber.App) *fiber.App {
-	app.Use(limiter.New(limiter.Config{
-		Max:               15,
-		Expiration:        15 * time.Second,
-		LimiterMiddleware: limiter.SlidingWindow{},
-	}))
-
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://0.0.0.0:5174",
-		AllowHeaders: "Origin, Content-Type, Accept, Authorization",
-	}))
-
+func ApiHandler(app *fiber.App, port string) *fiber.App {
+	app.Use(middleware.CorsMiddleware(port))
 	app.Use(logger.New())
 
 	api := app.Group("/api")
+	api.Use(middleware.LimiterMiddleware())
+
 	v1 := api.Group("/v1")
 
 	// Public routes
@@ -32,7 +22,7 @@ func ApiHandler(app *fiber.App) *fiber.App {
 
 	// Protected routes
 	protected := v1.Group("/profile")
-	protected.Use(AuthMiddleware)
+	protected.Use(middleware.AuthMiddleware)
 
 	protected.Get("/", GetProfile)
 

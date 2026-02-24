@@ -19,14 +19,13 @@ func main() {
 	}
 	defer drivers.CloseDB()
 
-	handlers.ApiHandler(app)
-
-	handlers.StaticHandler(app)
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "5173"
 	}
+
+	handlers.ApiHandler(app, port)
+	handlers.StaticHandler(app)
 
 	log.Printf("Server starting on port %s", port)
 	log.Fatal(app.Listen(":" + port))
