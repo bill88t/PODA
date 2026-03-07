@@ -5,7 +5,7 @@ import (
 	"os"
 
 	_ "main/drivers"
-	drivers "main/drivers/sqlite"
+	drivers "main/drivers/mariadb"
 	"main/handlers"
 
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +14,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	if err := drivers.InitDB("./poda.db"); err != nil {
+	if err := drivers.InitDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 	defer drivers.CloseDB()

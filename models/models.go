@@ -8,7 +8,7 @@ import (
 
 // UserModel Database type
 type UserModel struct {
-	ID           uuid.UUID `gorm:"primaryKey"`
+	ID           uuid.UUID `gorm:"primaryKey;type:varchar(36)"`
 	Kind         string    `gorm:"not null"`
 	FName        string    `gorm:"not null"`
 	LName        string    `gorm:"not null"`
@@ -23,7 +23,7 @@ type UserModel struct {
 // AppointmentModel Database type
 type AppointmentModel struct {
 	ID       uint      `gorm:"primaryKey;autoIncrement"`
-	UserID   uuid.UUID `gorm:"not null;index"`
+	UserID   uuid.UUID `gorm:"not null;index;type:varchar(36)"`
 	Datetime time.Time `gorm:"not null"`
 	Kind     string    `gorm:"not null"`
 }
