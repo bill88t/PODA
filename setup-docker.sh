@@ -8,8 +8,6 @@ COMPOSE_FILE="$TARGET_DIR/docker-compose.yml"
 SOURCE_COMPOSE="$SCRIPT_DIR/docker-compose.yml"
 ENV_FILE="$TARGET_DIR/.env"
 
-copied_compose=0
-
 if docker info > /dev/null 2>&1; then
     DOCKER_CMD="docker"
 else
@@ -30,11 +28,10 @@ if [ ! -d "$MARIADB_DIR" ]; then
     sudo chown 1000:1000 "$MARIADB_DIR"
 fi
 
-if [ ! -f "$COMPOSE_FILE" ]; then
-    echo "docker-compose.yml not found in $TARGET_DIR, copying from script directory"
+if [ ! -f "$COMPOSE_FILE" ] || ! diff -q "$SOURCE_COMPOSE" "$COMPOSE_FILE" > /dev/null 2>&1; then
+    echo "Updating docker-compose.yml in $TARGET_DIR"
     sudo cp "$SOURCE_COMPOSE" "$COMPOSE_FILE"
     sudo chown "$USER":"$USER" "$COMPOSE_FILE"
-    copied_compose=1
 fi
 
 if [ ! -f "$ENV_FILE" ]; then
@@ -53,26 +50,27 @@ TZ=Europe/Athens
 EOF
 fi
 
-if [ "$copied_compose" -eq 1 ]; then
-    echo "Checking docker availability.."
-    if ! $DOCKER_CMD info > /dev/null 2>&1; then
-        echo "Error: Docker is not running or not accessible even with sudo"
-        exit 1
-    fi
+echo "Checking docker availability.."
+if ! $DOCKER_CMD info > /dev/null 2>&1; then
+    echo "Error: Docker is not running or not accessible even with sudo"
+    exit 1
+fi
 
-    echo "Checking docker-compose availability.."
-    if ! command -v docker-compose > /dev/null 2>&1; then
-        echo "Error: docker-compose not found in PATH"
-        exit 1
-    fi
+echo "Building poda:latest.."
+$DOCKER_CMD build -t poda:latest "$SCRIPT_DIR"
 
-    echo "Starting up docker stack.."
-    cd "$TARGET_DIR"
-    if [ "$DOCKER_CMD" = "sudo docker" ]; then
-        sudo docker-compose up -d
-    else
-        docker-compose up -d
-    fi
+echo "Checking docker-compose availability.."
+if ! command -v docker-compose > /dev/null 2>&1; then
+    echo "Error: docker-compose not found in PATH"
+    exit 1
+fi
+
+echo "Starting up docker stack.."
+cd "$TARGET_DIR"
+if [ "$DOCKER_CMD" = "sudo docker" ]; then
+    sudo docker-compose up -d
+else
+    docker-compose up -d
 fi
 
 echo "Done!"

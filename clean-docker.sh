@@ -28,6 +28,12 @@ if [ -d "$TARGET_DIR" ]; then
     echo "Removing $TARGET_DIR.."
     cd /
     sudo rm -rf "$TARGET_DIR"
+
+    if $DOCKER_CMD image inspect poda:latest >/dev/null 2>&1; then
+        echo "Removing local image.."
+        $DOCKER_CMD image rm poda:latest
+    fi
+
     echo "Cleanup complete."
 else
     echo "Error: $TARGET_DIR does not exist, nothing to clean."

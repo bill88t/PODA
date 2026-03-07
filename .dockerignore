@@ -1,0 +1,10 @@
+.git
+.gitignore
+.pre-commit-config.yaml
+frontend/node_modules
+frontend/dist
+main
+poda.db*
+go.work
+go.work.sum
+.env

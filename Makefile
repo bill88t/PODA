@@ -40,17 +40,10 @@ main:
 	@echo "Building backend.."
 	@go build -o main .
 
+.PHONY: clean
 clean:
 	@echo "Cleaning build.."
 	@rm -f main
-
-full_clean: rmdb clean
-
-rmdb:
-	@echo "Wiping database.."
-	@rm -v poda.db-wal 2>/dev/null || true
-	@rm -v poda.db-shm 2>/dev/null || true
-	@rm -v poda.db 2>/dev/null || true
 
 test_bill_reg:
 	@echo "Registering bill88t.."
