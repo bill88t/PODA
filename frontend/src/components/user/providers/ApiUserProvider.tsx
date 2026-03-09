@@ -137,23 +137,21 @@ export function UserProvider(prop: { children: ReactNode }) {
         fname: string, lname: string,
         email: string, password: string,
         birthday: Date, phone: string, address: string | null,
-        kind: UserKind
     ): Promise<boolean> {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-            location.origin + "/api/v1/users/createaccount", {
+            location.origin + "/api/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
-                    uuid: user!.uuid,
                     fname:fname,
                     lname:lname,
                     email: email,
                     phone: phone,
+                    kind: "user",
                     password: password,
                     address: address,
-                    kind: kind,
                     birthday: birthday.toString().split("T")[0],
                 }),
                 headers: reqHeaders,
@@ -162,9 +160,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         if (res.status >= 300) return false;
 
         const resp = await res.json() as AuthUser;
-
         setUser(resp as AuthUser);
-
         return true;
     }
 
