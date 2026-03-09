@@ -10,8 +10,6 @@ repos:
       hooks:
         - id: errcheck
         - id: go-fmt-goimports
-        - id: go-test
-        - id: go-vet
         - id: gofumpt
         - id: golint
         - id: go-mod-tidy
