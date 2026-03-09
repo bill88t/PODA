@@ -142,14 +142,13 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-            location.origin + "/api/v1/users/signup", {
+            location.origin + "/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
                     fname:fname,
                     lname:lname,
                     email: email,
                     phone: phone,
-                    kind: "user",
                     password: password,
                     address: address,
                     birthday: birthday.toString().split("T")[0],
@@ -172,7 +171,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/api/v1/users/changepassword", {
+            location.origin + "/v1/api/users/changepassword", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: uuid,
@@ -193,8 +192,8 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/api/v1/users/changepassword", {
-                method: "POST",
+            location.origin + "/v1/api/users/changepassword", {
+                method: "DELETE",
                 body: JSON.stringify({
                     uuid: uuid,
                     id: id,
