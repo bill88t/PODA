@@ -1,4 +1,4 @@
-package sqlitemain
+package main
 
 import (
 	"log"
