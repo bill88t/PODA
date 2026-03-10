@@ -7,7 +7,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
-func ApiHandler(app *fiber.App, port string) *fiber.App {
+// APIHandler backend function
+func APIHandler(app *fiber.App, port string) *fiber.App {
 	app.Use(middleware.CorsMiddleware(port))
 	app.Use(logger.New())
 
@@ -20,7 +21,21 @@ func ApiHandler(app *fiber.App, port string) *fiber.App {
 	v1.Post("/users/signup", SignUp)
 	v1.Post("/users/login", Login)
 
-	// Protected routes
+	// User self-service routes (auth required)
+	users := v1.Group("/users")
+	users.Use(middleware.AuthMiddleware)
+	users.Post("/changepassword", ChangePassword)
+	users.Post("/changeinfo", ChangeInfo)
+	users.Post("/changecontact", ChangeContact)
+
+	// Barber-only routes (auth + barber role required)
+	barber := v1.Group("/barber")
+	barber.Use(middleware.AuthMiddleware)
+	barber.Use(middleware.BarberMiddleware)
+	barber.Get("/appointments", GetAllAppointmentsHandler)
+	barber.Delete("/appointments/:id", CancelAnyAppointment)
+
+	// Protected user profile routes
 	protected := v1.Group("/profile")
 	protected.Use(middleware.AuthMiddleware)
 

@@ -47,8 +47,8 @@ func hashPassword(password string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// CreateUser inserts a new user into the database
-func CreateUser(fname, lname, email, password string, birthday time.Time) (*User, error) {
+// CreateUser inserts a new user into the database with the given kind ("client" or "barber")
+func CreateUser(fname, lname, email, password, kind string, birthday time.Time) (*User, error) {
 	id := uuid.New()
 	passwordHash := hashPassword(password)
 
@@ -57,7 +57,7 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 
 	userModel := model.UserModel{
 		ID:           id,
-		Kind:         "client",
+		Kind:         kind,
 		FName:        fname,
 		LName:        lname,
 		Email:        email,
@@ -71,7 +71,7 @@ func CreateUser(fname, lname, email, password string, birthday time.Time) (*User
 
 	return &User{
 		ID:           id,
-		Kind:         "client",
+		Kind:         kind,
 		Fname:        fname,
 		Lname:        lname,
 		Email:        email,
@@ -161,6 +161,44 @@ func GetUserByID(id string) (*User, error) {
 		Address:      user.Address,
 		Appointments: appointments,
 	}, nil
+}
+
+// UpdateUserPassword updates the password hash for a user
+func UpdateUserPassword(id string, password string) error {
+	return drivers.Db.Model(&model.UserModel{}).
+		Where("id = ?", id).
+		Update("password_hash", hashPassword(password)).Error
+}
+
+// UpdateUserInfo updates the name and birthday for a user
+func UpdateUserInfo(id string, fname, lname string, birthday time.Time) error {
+	bdayStr := birthday.Format("2006-01-02")
+	return drivers.Db.Model(&model.UserModel{}).
+		Where("id = ?", id).
+		Updates(map[string]any{
+			"f_name":   fname,
+			"l_name":   lname,
+			"birthday": bdayStr,
+		}).Error
+}
+
+// UpdateUserContact updates the email and phone for a user
+func UpdateUserContact(id string, email, phone string) error {
+	return drivers.Db.Model(&model.UserModel{}).
+		Where("id = ?", id).
+		Updates(map[string]any{
+			"email": email,
+			"phone": phone,
+		}).Error
+}
+
+// GetAllAppointments fetches every appointment across all users
+func GetAllAppointments() ([]model.AppointmentModel, error) {
+	var appointments []model.AppointmentModel
+	if err := drivers.Db.Find(&appointments).Error; err != nil {
+		return nil, err
+	}
+	return appointments, nil
 }
 
 // EmailExists checks if an email is already registered
