@@ -5,10 +5,21 @@ import (
 	"github.com/google/uuid"
 )
 
+// GetProfile getter
 func GetProfile(ctx *fiber.Ctx) error {
 	userID := ctx.Locals("userID").(uuid.UUID)
 
-	user, err := GetUserByID(userID.String())
+	targetID := userID.String()
+	if IsBarber(userID) {
+		if q := ctx.Query("uuid"); q != "" {
+			if _, err := uuid.Parse(q); err != nil {
+				return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid uuid"})
+			}
+			targetID = q
+		}
+	}
+
+	user, err := GetUserByID(targetID)
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
