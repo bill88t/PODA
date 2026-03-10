@@ -123,11 +123,7 @@ func CreateAppointment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create appointment"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(Appointment{
-		ID:       appointment.ID,
-		Datetime: appointment.Datetime,
-		Kind:     appointment.Kind,
-	})
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 // UpdateAppointment updates an existing appointment for the authenticated user
@@ -169,11 +165,7 @@ func UpdateAppointment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update appointment"})
 	}
 
-	return c.JSON(Appointment{
-		ID:       appointment.ID,
-		Datetime: appointment.Datetime,
-		Kind:     appointment.Kind,
-	})
+	return c.SendStatus(fiber.StatusOK)
 }
 
 // DeleteAppointment deletes an appointment.

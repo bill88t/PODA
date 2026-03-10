@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Login main function
 func Login(ctx *fiber.Ctx) error {
 	req := new(struct {
 		Email    string `json:"email"`
@@ -31,18 +32,5 @@ func Login(ctx *fiber.Ctx) error {
 
 	ctx.Response().Header.Add("Authorization", "Bearer "+token)
 
-	return ctx.JSON(fiber.Map{
-		"user": UserResponse{
-			ID:           user.ID,
-			Kind:         user.Kind,
-			Fname:        user.Fname,
-			Lname:        user.Lname,
-			Email:        user.Email,
-			Phone:        user.Phone,
-			Birthday:     user.Birthday,
-			Address:      user.Address,
-			Appointments: user.Appointments,
-		},
-		"token": token,
-	})
+	return ctx.JSON(fiber.Map{"token": token})
 }
