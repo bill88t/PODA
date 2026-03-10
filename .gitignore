@@ -9,4 +9,4 @@ profile.cov
 go.work
 go.work.sum
 .env
-poda.db*
+test.db*

@@ -24,7 +24,7 @@ func main() {
 		port = "5173"
 	}
 
-	handlers.ApiHandler(app, port)
+	handlers.APIHandler(app, port)
 	handlers.StaticHandler(app)
 
 	log.Printf("Server starting on port %s", port)
