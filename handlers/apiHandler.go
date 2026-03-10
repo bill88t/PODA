@@ -28,13 +28,6 @@ func APIHandler(app *fiber.App, port string) *fiber.App {
 	users.Post("/changeinfo", ChangeInfo)
 	users.Post("/changecontact", ChangeContact)
 
-	// Barber-only routes (auth + barber role required)
-	barber := v1.Group("/barber")
-	barber.Use(middleware.AuthMiddleware)
-	barber.Use(middleware.BarberMiddleware)
-	barber.Get("/appointments", GetAllAppointmentsHandler)
-	barber.Delete("/appointments/:id", CancelAnyAppointment)
-
 	// Protected user profile routes
 	protected := v1.Group("/profile")
 	protected.Use(middleware.AuthMiddleware)

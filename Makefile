@@ -245,7 +245,7 @@ test_barber_login:
 test_barber_get_all_appointments:
 	@echo "Barber fetching all appointments.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
-	@curl -s -X GET http://localhost:5173/api/v1/barber/appointments \
+	@curl -s -X GET http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
 	@echo
@@ -254,19 +254,11 @@ test_barber_cancel_appointment:
 	@echo "Barber cancelling appointment.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
 	@$(eval APPT_ID=$(shell jq -r '.id' /$(PREFIX)/tmp/appointment_response.json))
-	@curl -s -X DELETE http://localhost:5173/api/v1/barber/appointments/$(APPT_ID) \
+	@curl -s -X DELETE http://localhost:5173/api/v1/profile/appointments/$(APPT_ID) \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo OK
 	@echo
 
-test_barber_forbidden_for_client:
-	@echo "Testing barber route as client (should fail).."
-	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
-	@curl -s -X GET http://localhost:5173/api/v1/barber/appointments \
-	  -H "Authorization: Bearer $(TOKEN)"
-	@echo
-	@echo
-
 runtests: test_bill_reg test_bill_login test_bill_profile test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_barber_reg test_barber_login test_barber_get_all_appointments test_bill_delete_appointment
 
-runtests_full: test_bill_reg test_bill_duplicate_reg test_bill_login test_bill_invalid_login test_bill_profile test_bill_profile_fail test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_appointment_not_found test_bill_invalid_appointment test_bill_appointment_no_auth test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_bill_change_no_auth test_barber_reg test_barber_login test_barber_get_all_appointments test_barber_forbidden_for_client test_bill_create_appointment test_barber_cancel_appointment test_bill_get_appointments
+runtests_full: test_bill_reg test_bill_duplicate_reg test_bill_login test_bill_invalid_login test_bill_profile test_bill_profile_fail test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_appointment_not_found test_bill_invalid_appointment test_bill_appointment_no_auth test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_bill_change_no_auth test_barber_reg test_barber_login test_barber_get_all_appointments test_bill_create_appointment test_barber_cancel_appointment test_bill_get_appointments

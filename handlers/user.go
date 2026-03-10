@@ -8,7 +8,6 @@ import (
 	"main/drivers"
 	model "main/models"
 
-	_ "github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -192,13 +191,13 @@ func UpdateUserContact(id string, email, phone string) error {
 		}).Error
 }
 
-// GetAllAppointments fetches every appointment across all users
-func GetAllAppointments() ([]model.AppointmentModel, error) {
-	var appointments []model.AppointmentModel
-	if err := drivers.Db.Find(&appointments).Error; err != nil {
-		return nil, err
+// IsBarber returns true if the user with the given ID has kind="barber"
+func IsBarber(id uuid.UUID) bool {
+	var user model.UserModel
+	if err := drivers.Db.Select("kind").First(&user, "id = ?", id).Error; err != nil {
+		return false
 	}
-	return appointments, nil
+	return user.Kind == "barber"
 }
 
 // EmailExists checks if an email is already registered
