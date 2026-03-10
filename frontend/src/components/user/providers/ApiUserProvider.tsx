@@ -12,9 +12,13 @@ import {
 
 
 export function UserProvider(prop: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    // const userCtx = useUser();
-    const [jwt, setJwt] = useState<string | null>();
+    const u = sessionStorage.getItem("user")
+
+    const [user, setUser] = useState<User | null>(
+        u ? JSON.parse(u) : null
+    );
+    const j = sessionStorage.getItem("jwt")
+    const [jwt, setJwt] = useState<string | null>(j);
 
     async function connect(email: string, password: string): Promise<boolean> {
 
@@ -38,6 +42,8 @@ export function UserProvider(prop: { children: ReactNode }) {
         const data = await res.json();
         const headers = res.headers;
         const auth = headers.get("Authorization");
+
+        if (auth) sessionStorage.setItem("jwt", auth);
         setJwt(auth);
 
         setUser({
@@ -51,12 +57,14 @@ export function UserProvider(prop: { children: ReactNode }) {
             address  : data.address as string,
         } as AuthUser);
 
+        sessionStorage.setItem("user", JSON.stringify(user));
         return true;
 
     }
 
     async function disconnect() {
         setUser(null);
+        sessionStorage.clean();
     }
 
     async function changeContact(email: string, phone? : string): Promise<boolean> {
@@ -158,8 +166,17 @@ export function UserProvider(prop: { children: ReactNode }) {
         );
         if (res.status >= 300) return false;
 
+        const headers = res.headers;
+        const auth = headers.get("Authorization");
+
+        if (auth) sessionStorage.setItem("jwt", auth);
+        setJwt(auth);
+
         const resp = await res.json() as AuthUser;
+
         setUser(resp as AuthUser);
+        sessionStorage.setItem("user", JSON.stringify(user));
+
         return true;
     }
 
