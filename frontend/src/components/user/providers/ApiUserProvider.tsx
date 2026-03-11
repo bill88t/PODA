@@ -13,22 +13,17 @@ import {
 
 export function UserProvider(prop: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    // const userCtx = useUser();
-    const [jwt, setJwt] = useState<string | null>();
+    const [jwt, setJwt] = useState<string | null>(null);
 
     async function connect(email: string, password: string): Promise<boolean> {
-
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-             location.origin + "/api/v1/users/login",
+            location.origin + "/api/v1/users/login",
             {
                 method: "POST",
-                body: JSON.stringify({
-                    "email": email,
-                    "password": password,
-                }),
+                body: JSON.stringify({ "email": email, "password": password }),
                 headers: reqHeaders,
             }
         );
@@ -36,23 +31,33 @@ export function UserProvider(prop: { children: ReactNode }) {
         if (res.status >= 300) return false;
 
         const data = await res.json();
-        const headers = res.headers;
-        const auth = headers.get("Authorization");
-        setJwt(auth);
+        const token = "Bearer " + data.token;
+        setJwt(token);
 
+        // Fetch full profile since login only returns the token
+        const profileHeaders = new Headers();
+        profileHeaders.append("Authorization", token);
+        const profileRes = await fetch(
+            location.origin + "/api/v1/profile/",
+            { method: "GET", headers: profileHeaders }
+        );
+
+        if (profileRes.status >= 300) return false;
+
+        const profile = await profileRes.json();
         setUser({
-            email    : email as string,
-            kind     : data.kind as UserKind,
-            uuid     : data.id as number,
-            fname    : data.fname as string,
-            lname    : data.lname as string,
-            phone    : data.phone as string,
-            birthday : new Date(data.birthday),
-            address  : data.address as string,
+            email    : profile.email as string,
+            kind     : profile.kind as UserKind,
+            uuid     : profile.id as string,
+            fname    : profile.fname as string,
+            lname    : profile.lname as string,
+            phone    : profile.phone as string,
+            birthday : new Date(profile.birthday),
+            address  : profile.address as string,
+            appointments: profile.appointments ?? [],
         } as AuthUser);
 
         return true;
-
     }
 
     async function disconnect() {
@@ -96,7 +101,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                     uuid: user!.uuid,
                     fname:fname,
                     lname:lname,
-                    birthday: birthday.toString().split("T")[0],
+                    birthday: birthday.toISOString().split("T")[0],
                 }),
                 headers: reqHeaders,
             }
@@ -133,7 +138,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         return true;
     }
 
-    async function createAccount (
+    async function createAccount(
         fname: string, lname: string,
         email: string, password: string,
         birthday: Date, phone: string, address: string | null,
@@ -142,90 +147,80 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-            location.origin + "/v1/users/signup", {
+            location.origin + "/api/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
-                    fname:fname,
-                    lname:lname,
-                    email: email,
-                    phone: phone,
-                    password: password,
-                    address: address,
-                    birthday: birthday.toString().split("T")[0],
+                    fname, lname, email, phone, password, address,
+                    birthday: birthday.toISOString().split("T")[0],
                 }),
                 headers: reqHeaders,
             }
         );
-        if (res.status >= 300) return false;
-
-        const resp = await res.json() as AuthUser;
-        setUser(resp as AuthUser);
-        return true;
+        return res.status < 300;
     }
 
     async function createAppointment(
-uuid: Uuid, kind: AppointmentKind, datetime: Date
+        _uuid: Uuid, kind: AppointmentKind, datetime: Date
     ): Promise<boolean> {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/v1/api/users/changepassword", {
+            location.origin + "/api/v1/profile/appointments/", {
                 method: "POST",
                 body: JSON.stringify({
-                    uuid: uuid,
                     kind: kind,
-                    datetime: datetime,
+                    datetime: datetime.toISOString(),
                 }),
                 headers: reqHeaders,
             }
         );
-        if (res.status >= 300) return false;
-
-        return true;
+        return res.status < 300;
     }
 
-    async function deleteAppointment(uuid: Uuid, id: number): Promise<boolean> {
+    async function deleteAppointment(_uuid: Uuid, id: number): Promise<boolean> {
         const reqHeaders = new Headers();
-        reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/v1/api/users/changepassword", {
+            location.origin + `/api/v1/profile/appointments/${id}`, {
                 method: "DELETE",
-                body: JSON.stringify({
-                    uuid: uuid,
-                    id: id,
-                }),
                 headers: reqHeaders,
             }
         );
-        if (res.status >= 300) return false;
-
-        return true;
+        return res.status < 300;
     }
 
-    async function viewAppointment(uuid: Uuid, datetime: Date): Promise<AppointmentView[]> {
+    async function viewAppointment(_uuid: Uuid, _datetime: Date): Promise<AppointmentView[]> {
         const reqHeaders = new Headers();
-        reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/api/v1/users/viewappointment", {
-                method: "POST",
-                body: JSON.stringify({
-                    uuid: uuid,
-                    datetime: datetime,
-                }),
+            location.origin + "/api/v1/profile/appointments/", {
+                method: "GET",
                 headers: reqHeaders,
             }
         );
         if (res.status >= 300) return [];
 
-        const resp = res.json() as Promise<AppointmentView[]>;
+        const appointments = await res.json() as {
+            id: number;
+            user_id?: string;
+            datetime: string;
+            kind: string;
+        }[];
 
-        return resp;
+        return appointments.map(a => ({
+            userUuid: a.user_id ?? user!.uuid,
+            fname: user!.fname,
+            lname: user!.lname,
+            appointment: {
+                id: a.id,
+                datetime: new Date(a.datetime),
+                kind: a.kind as AppointmentKind,
+            },
+        }));
     }
 
     return(
