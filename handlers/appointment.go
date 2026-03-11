@@ -15,48 +15,63 @@ import (
 // Appointment struct for API representation
 type Appointment struct {
 	ID       uint      `json:"id"`
+	UserID   string    `json:"user_id,omitempty"`
 	Datetime time.Time `json:"datetime"`
 	Kind     string    `json:"kind"`
 }
 
-// GetUserAppointments fetches all appointments for the authenticated user
+// GetUserAppointments fetches appointments for the authenticated user.
+// Barbers receive all appointments across all users.
 func GetUserAppointments(ctx *fiber.Ctx) error {
 	userID := ctx.Locals("userID").(uuid.UUID)
-	userUUID, err := uuid.Parse(userID.String())
-	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
-	}
 
 	var appointments []model.AppointmentModel
-	if err := drivers.Db.Where("user_id = ?", userUUID).Find(&appointments).Error; err != nil {
-		log.Printf("failed to fetch appointments: %v", err)
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
+
+	if IsBarber(userID) {
+		if err := drivers.Db.Find(&appointments).Error; err != nil {
+			log.Printf("failed to fetch all appointments: %v", err)
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
+		}
+	} else {
+		if err := drivers.Db.Where("user_id = ?", userID).Find(&appointments).Error; err != nil {
+			log.Printf("failed to fetch appointments: %v", err)
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointments"})
+		}
 	}
 
+	isBarber := IsBarber(userID)
 	result := make([]Appointment, len(appointments))
 	for i, a := range appointments {
-		result[i] = Appointment{
+		appt := Appointment{
 			ID:       a.ID,
 			Datetime: a.Datetime,
 			Kind:     a.Kind,
 		}
+		if isBarber {
+			appt.UserID = a.UserID.String()
+		}
+		result[i] = appt
 	}
 
 	return ctx.JSON(result)
 }
 
-// GetUserAppointmentByID fetches a single appointment by ID for the authenticated user
+// GetUserAppointmentByID fetches a single appointment by ID.
+// Barbers can fetch any appointment; clients are restricted to their own.
 func GetUserAppointmentByID(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uuid.UUID)
-	userUUID, err := uuid.Parse(userID.String())
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
-	}
-
 	appointmentID := c.Params("id")
 
 	var appointment model.AppointmentModel
-	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	var err error
+
+	if IsBarber(userID) {
+		err = drivers.Db.First(&appointment, "id = ?", appointmentID).Error
+	} else {
+		err = drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userID).First(&appointment).Error
+	}
+
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}
@@ -64,20 +79,21 @@ func GetUserAppointmentByID(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch appointment"})
 	}
 
-	return c.JSON(Appointment{
+	appt := Appointment{
 		ID:       appointment.ID,
 		Datetime: appointment.Datetime,
 		Kind:     appointment.Kind,
-	})
+	}
+	if IsBarber(userID) {
+		appt.UserID = appointment.UserID.String()
+	}
+
+	return c.JSON(appt)
 }
 
 // CreateAppointment creates a new appointment for the authenticated user
 func CreateAppointment(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uuid.UUID)
-	userUUID, err := uuid.Parse(userID.String())
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
-	}
 
 	req := new(struct {
 		Datetime string `json:"datetime"`
@@ -97,7 +113,7 @@ func CreateAppointment(c *fiber.Ctx) error {
 	}
 
 	appointment := model.AppointmentModel{
-		UserID:   userUUID,
+		UserID:   userID,
 		Datetime: datetime,
 		Kind:     req.Kind,
 	}
@@ -107,25 +123,17 @@ func CreateAppointment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create appointment"})
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(Appointment{
-		ID:       appointment.ID,
-		Datetime: appointment.Datetime,
-		Kind:     appointment.Kind,
-	})
+	return c.SendStatus(fiber.StatusCreated)
 }
 
 // UpdateAppointment updates an existing appointment for the authenticated user
 func UpdateAppointment(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uuid.UUID)
-	userUUID, err := uuid.Parse(userID.String())
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
-	}
 
 	appointmentID := c.Params("id")
 
 	var appointment model.AppointmentModel
-	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userID).First(&appointment).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}
@@ -157,25 +165,25 @@ func UpdateAppointment(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update appointment"})
 	}
 
-	return c.JSON(Appointment{
-		ID:       appointment.ID,
-		Datetime: appointment.Datetime,
-		Kind:     appointment.Kind,
-	})
+	return c.SendStatus(fiber.StatusOK)
 }
 
-// DeleteAppointment deletes an appointment for the authenticated user
+// DeleteAppointment deletes an appointment.
+// Barbers can delete any appointment; clients are restricted to their own.
 func DeleteAppointment(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uuid.UUID)
-	userUUID, err := uuid.Parse(userID.String())
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
-	}
-
 	appointmentID := c.Params("id")
 
 	var appointment model.AppointmentModel
-	if err := drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userUUID).First(&appointment).Error; err != nil {
+	var err error
+
+	if IsBarber(userID) {
+		err = drivers.Db.First(&appointment, "id = ?", appointmentID).Error
+	} else {
+		err = drivers.Db.Where("id = ? AND user_id = ?", appointmentID, userID).First(&appointment).Error
+	}
+
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Appointment not found"})
 		}

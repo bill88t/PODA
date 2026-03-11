@@ -3,8 +3,6 @@ package handlers
 import (
 	"time"
 
-	"main/middleware"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -43,28 +41,9 @@ func SignUp(ctx *fiber.Ctx) error {
 		kind = "barber"
 	}
 
-	user, err := CreateUser(req.Fname, req.Lname, req.Email, req.Password, kind, birthday)
-	if err != nil {
+	if _, err := CreateUser(req.Fname, req.Lname, req.Email, req.Password, kind, birthday); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create user"})
 	}
 
-	token, err := middleware.GenerateToken(user.ID, user.Email)
-	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to generate token"})
-	}
-
-	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"user": UserResponse{
-			ID:           user.ID,
-			Kind:         user.Kind,
-			Fname:        user.Fname,
-			Lname:        user.Lname,
-			Email:        user.Email,
-			Phone:        user.Phone,
-			Birthday:     user.Birthday,
-			Address:      user.Address,
-			Appointments: []Appointment{},
-		},
-		"token": token,
-	})
+	return ctx.SendStatus(fiber.StatusCreated)
 }

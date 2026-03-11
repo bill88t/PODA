@@ -65,15 +65,15 @@ test_bill_login:
 	@curl -s -X POST http://localhost:5173/api/v1/users/login \
 	  -H "Content-Type: application/json" \
 	  -d '{ "email":  "bill88t@feline.gr", "password": "securepassword123" }' \
-	  | tee /$(PREFIX)/tmp/login_response.json
-	@echo
+	  | jq -c . | tee /$(PREFIX)/tmp/login_response.json
 	@echo
 
 test_bill_profile:
 	@echo "Getting profile.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
 	@curl -s -X GET http://localhost:5173/api/v1/profile/ \
-	  -H "Authorization: Bearer $(TOKEN)"
+	  -H "Authorization: Bearer $(TOKEN)" \
+	  | tee /$(PREFIX)/tmp/bill_profile_response.json
 	@echo
 	@echo
 
@@ -105,9 +105,11 @@ test_bill_create_appointment:
 	@curl -s -X POST http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
-	  -d '{"datetime": "2026-02-15T10:00:00Z", "kind": "haircut"}' \
-	  | tee /$(PREFIX)/tmp/appointment_response.json
-	@echo
+	  -d '{"datetime": "2026-02-15T10:00:00Z", "kind": "haircut"}'
+	@# Fetch the newest appointment for this user and save it to appointment_response.json
+	@curl -s -X GET http://localhost:5173/api/v1/profile/appointments/ \
+	  -H "Authorization: Bearer $(TOKEN)" \
+	  | jq -c '.[0]' | tee /$(PREFIX)/tmp/appointment_response.json
 	@echo
 
 test_bill_get_appointments:
@@ -195,7 +197,7 @@ test_barber_reg:
 test_bill_changepassword:
 	@echo "Changing bill's password.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
-	@$(eval UUID=$(shell jq -r '.user.id' /$(PREFIX)/tmp/login_response.json))
+	@$(eval UUID=$(shell jq -r '.id' /$(PREFIX)/tmp/bill_profile_response.json))
 	@curl -s -X POST http://localhost:5173/api/v1/users/changepassword \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
@@ -206,7 +208,7 @@ test_bill_changepassword:
 test_bill_changeinfo:
 	@echo "Changing bill's info.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
-	@$(eval UUID=$(shell jq -r '.user.id' /$(PREFIX)/tmp/login_response.json))
+	@$(eval UUID=$(shell jq -r '.id' /$(PREFIX)/tmp/bill_profile_response.json))
 	@curl -s -X POST http://localhost:5173/api/v1/users/changeinfo \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
@@ -217,7 +219,7 @@ test_bill_changeinfo:
 test_bill_changecontact:
 	@echo "Changing bill's contact.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
-	@$(eval UUID=$(shell jq -r '.user.id' /$(PREFIX)/tmp/login_response.json))
+	@$(eval UUID=$(shell jq -r '.id' /$(PREFIX)/tmp/bill_profile_response.json))
 	@curl -s -X POST http://localhost:5173/api/v1/users/changecontact \
 	  -H "Content-Type: application/json" \
 	  -H "Authorization: Bearer $(TOKEN)" \
@@ -238,14 +240,14 @@ test_barber_login:
 	@curl -s -X POST http://localhost:5173/api/v1/users/login \
 	  -H "Content-Type: application/json" \
 	  -d '{"email": "tony@barber.gr", "password": "barberpassword123"}' \
-	  | tee /$(PREFIX)/tmp/barber_login_response.json
+	  | jq -c . | tee /$(PREFIX)/tmp/barber_login_response.json
 	@echo
 	@echo
 
 test_barber_get_all_appointments:
 	@echo "Barber fetching all appointments.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
-	@curl -s -X GET http://localhost:5173/api/v1/barber/appointments \
+	@curl -s -X GET http://localhost:5173/api/v1/profile/appointments/ \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
 	@echo
@@ -254,19 +256,28 @@ test_barber_cancel_appointment:
 	@echo "Barber cancelling appointment.."
 	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
 	@$(eval APPT_ID=$(shell jq -r '.id' /$(PREFIX)/tmp/appointment_response.json))
-	@curl -s -X DELETE http://localhost:5173/api/v1/barber/appointments/$(APPT_ID) \
+	@curl -s -X DELETE http://localhost:5173/api/v1/profile/appointments/$(APPT_ID) \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo OK
 	@echo
 
-test_barber_forbidden_for_client:
-	@echo "Testing barber route as client (should fail).."
-	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/login_response.json))
-	@curl -s -X GET http://localhost:5173/api/v1/barber/appointments \
+test_barber_get_user_profile:
+	@echo "Barber fetching specific user profile.."
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
+	@$(eval UUID=$(shell jq -r '.id' /$(PREFIX)/tmp/bill_profile_response.json))
+	@curl -s -X GET "http://localhost:5173/api/v1/profile/?uuid=$(UUID)" \
 	  -H "Authorization: Bearer $(TOKEN)"
 	@echo
 	@echo
 
-runtests: test_bill_reg test_bill_login test_bill_profile test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_barber_reg test_barber_login test_barber_get_all_appointments test_bill_delete_appointment
+test_barber_get_user_profile_invalid:
+	@echo "Barber fetching profile with invalid uuid (should fail).."
+	@$(eval TOKEN=$(shell jq -r '.token' /$(PREFIX)/tmp/barber_login_response.json))
+	@curl -s -X GET "http://localhost:5173/api/v1/profile/?uuid=not-a-uuid" \
+	  -H "Authorization: Bearer $(TOKEN)"
+	@echo
+	@echo
 
-runtests_full: test_bill_reg test_bill_duplicate_reg test_bill_login test_bill_invalid_login test_bill_profile test_bill_profile_fail test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_appointment_not_found test_bill_invalid_appointment test_bill_appointment_no_auth test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_bill_change_no_auth test_barber_reg test_barber_login test_barber_get_all_appointments test_barber_forbidden_for_client test_bill_create_appointment test_barber_cancel_appointment test_bill_get_appointments
+runtests: test_bill_reg test_bill_login test_bill_profile test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_barber_reg test_barber_login test_barber_get_all_appointments test_barber_get_user_profile test_bill_delete_appointment
+
+runtests_full: test_bill_reg test_bill_duplicate_reg test_bill_login test_bill_invalid_login test_bill_profile test_bill_profile_fail test_bill_create_appointment test_bill_get_appointments test_bill_get_appointment_by_id test_bill_update_appointment test_bill_create_second_appointment test_bill_get_appointments test_bill_appointment_not_found test_bill_invalid_appointment test_bill_appointment_no_auth test_bill_changepassword test_bill_changeinfo test_bill_changecontact test_bill_change_no_auth test_barber_reg test_barber_login test_barber_get_all_appointments test_barber_get_user_profile test_barber_get_user_profile_invalid test_bill_create_appointment test_barber_cancel_appointment test_bill_get_appointments
