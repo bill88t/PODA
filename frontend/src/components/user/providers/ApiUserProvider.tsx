@@ -25,8 +25,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch(
-             location.origin + "/api/v1/users/login",
+        const res = await fetch("/api/v1/users/login",
             {
                 method: "POST",
                 body: JSON.stringify({
@@ -46,7 +45,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         if (auth) sessionStorage.setItem("jwt", auth);
         setJwt(auth);
 
-        setUser({
+        const tempUser = {
             email    : email as string,
             kind     : data.kind as UserKind,
             uuid     : data.id as number,
@@ -55,7 +54,9 @@ export function UserProvider(prop: { children: ReactNode }) {
             phone    : data.phone as string,
             birthday : new Date(data.birthday),
             address  : data.address as string,
-        } as AuthUser);
+        } as AuthUser
+
+        setUser(tempUser);
 
         sessionStorage.setItem("user", JSON.stringify(user));
         return true;
@@ -72,8 +73,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch(
-            location.origin + "/api/v1/users/changecontact", {
+        const res = await fetch("/api/v1/users/changecontact", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: user!.uuid,
@@ -97,8 +97,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch(
-            location.origin + "/api/v1/users/changeinfo", {
+        const res = await fetch("/api/v1/users/changeinfo", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: user!.uuid,
@@ -149,8 +148,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch(
-            location.origin + "/api/v1/users/signup", {
+        const res = await fetch("/api/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
                     fname:fname,
@@ -175,7 +173,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         const resp = await res.json() as AuthUser;
 
         setUser(resp as AuthUser);
-        sessionStorage.setItem("user", JSON.stringify(user));
+        sessionStorage.setItem("user", JSON.stringify(resp));
 
         return true;
     }
@@ -187,8 +185,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch(
-            location.origin + "/v1/api/users/changepassword", {
+        const res = await fetch("/api/v1/users/changepassword", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: uuid,
@@ -208,8 +205,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch(
-            location.origin + "/v1/api/users/changepassword", {
+        const res = await fetch("/api/v1/users/changepassword", {
                 method: "DELETE",
                 body: JSON.stringify({
                     uuid: uuid,
@@ -228,8 +224,7 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch(
-            location.origin + "/api/v1/users/viewappointment", {
+        const res = await fetch("/api/v1/users/viewappointment", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: uuid,
