@@ -26,7 +26,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-             location.origin + "/v1/users/login",
+             location.origin + "/api/v1/users/login",
             {
                 method: "POST",
                 body: JSON.stringify({
@@ -150,7 +150,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Content-Type", "application/json");
 
         const res = await fetch(
-            location.origin + "/v1/users/signup", {
+            location.origin + "/api/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
                     fname:fname,
