@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useUser } from "../components/user/userContext";
+import { normalizePhone, isValidPhone } from "../utils/phone";
 
 enum flagSwitch {
     password,
@@ -145,7 +146,7 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
     if (user === null) throw Error("ChangeContactInformation user is null");
     const [ email, setEmail ] = useState<string>(user.email);
     const [ phone, setPhone ] = useState<string>(
-        user.phone !== null ? user.phone : ""
+        user.phone !== null ? normalizePhone(user.phone) : ""
     );
     return (
         prop.flag & (1 << flagSwitch.contactInformation)
@@ -162,23 +163,27 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
             } }
             />
             <div>Phone Number</div>
-            <input type="number"
+            <input type="text"
             value={phone}
-            onChange={ e => {
-                setPhone(e.target.value);
-            } }
+            onChange={ e => { setPhone(e.target.value); } }
+            onBlur={ () => { setPhone(normalizePhone(phone)); } }
             />
             <button
                 onClick={
                     async () => {
                         const rgEmail = /\w+@\w+\.\w{2,3}/
                         if (!rgEmail.test(email)) {
-                            setError("Give valid email");
+                            setError("Invalid email");
                             return;
                         }
                         let ok: boolean = false;
-                        if (phone !== "" || phone !== user.phone) {
-                            ok = await changeContact(email, phone);
+                        const formattedPhone = phone !== "" ? normalizePhone(phone) : undefined;
+                        if (formattedPhone !== undefined && !isValidPhone(formattedPhone)) {
+                            setError("Invalid phone");
+                            return;
+                        }
+                        if (formattedPhone !== undefined && formattedPhone !== (user.phone ? normalizePhone(user.phone) : "")) {
+                            ok = await changeContact(email, formattedPhone);
                         } else {
                             ok = await changeContact(email);
                         }
@@ -199,7 +204,7 @@ function ChangeContactInformation(prop: { flag: number; setFlag: (arg0: number) 
             <div>Email</div>
             <div className="field">{user.email}</div>
             <div>Phone Number</div>
-            <div className="field">{user.phone}</div>
+            <div className="field">{user.phone ? normalizePhone(user.phone) : ""}</div>
             <button
                 className="span2"
                 onClick={

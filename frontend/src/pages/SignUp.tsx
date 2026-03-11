@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { UserKind, useUser } from "../components/user/userContext"
 import { usePath } from "../components/path/pathContext";
+import { normalizePhone, isValidPhone } from "../utils/phone";
 
 export default function SignUp() {
     const userCtx = useUser();
@@ -25,36 +26,38 @@ export default function SignUp() {
                 }
                 <div>First Name</div>
                 <input type="text"
-                    onChange={e => setFname(e.target.value)}    
+                    onChange={e => setFname(e.target.value)}
                 />
                 <div>Last Name</div>
                 <input type="text"
-                    onChange={e => setLname(e.target.value)}    
+                    onChange={e => setLname(e.target.value)}
                 />
                 <div>Email</div>
                 <input
                     type="text"
-                    onChange={e => setEmail(e.target.value)}    
+                    onChange={e => setEmail(e.target.value)}
                 />
                 <div>Password</div>
                 <input type="password"
-                    onChange={e => setPassword(e.target.value)}    
+                    onChange={e => setPassword(e.target.value)}
                 />
                 <div>Password again</div>
                 <input type="password"
-                    onChange={e => setValidPassword(e.target.value === password)}    
+                    onChange={e => setValidPassword(e.target.value === password)}
                 />
                 <div>Phone</div>
-                <input type="number"
-                    onChange={e => setPhone(e.target.value)}    
+                <input type="text"
+                    value={phone}
+                    onChange={e => setPhone(e.target.value)}
+                    onBlur={() => setPhone(normalizePhone(phone))}
                 />
                 <div>Address</div>
-                <input type="text" 
-                    onChange={e => setAddress(e.target.value)}    
+                <input type="text"
+                    onChange={e => setAddress(e.target.value)}
                 />
                 <div>Birthday</div>
                 <input type="date"
-                    onChange={e => setBdate(new Date(e.target.value))}    
+                    onChange={e => setBdate(new Date(e.target.value))}
                 />
                 <button
                     onClick={
@@ -73,7 +76,7 @@ export default function SignUp() {
                             }
                             const rgEmail = /\w+@\w+\.\w{2,3}?/;
                             if (!rgEmail.test(email)) {
-                                setError("Give valid Email");
+                                setError("Invalid Email");
                                 return;
                             }
                             if (bdate === null) {
@@ -84,9 +87,10 @@ export default function SignUp() {
                                 setError("Missing Phone");
                                 return;
                             }
-                            const rgPhone = /(\+[0-9]{2})?[0-9]{10}/
-                            if (!rgPhone.test(phone)) {
-                                setError("Give valid phone");
+                            const formattedPhone = normalizePhone(phone);
+                            setPhone(formattedPhone);
+                            if (!isValidPhone(formattedPhone)) {
+                                setError("Invalid phone");
                                 return;
                             }
                             if (!validPassword) {
