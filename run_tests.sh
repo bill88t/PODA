@@ -32,12 +32,15 @@ SERVER_PID=$!
 # Step 3: Wait for the server to be ready
 echo " ===> Waiting for server"
 
-status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "http://localhost:$PORT/api/v1/users/login")
-if [[ "$status" != 401 ]]; then
-    echo " [-!!-] Unexpected response: $status"
-    exit 1
-fi
-echo " ===> Server ready"
+while true; do
+    status=$(curl -fsS -o /dev/null -w '%{http_code}' --connect-timeout 3 "http://127.0.0.1:$PORT/api/v1/users/login" 2>/dev/null || echo)
+    if [[ "$status" == 401 ]]; then
+        echo " ===> Server ready"
+        break
+    fi
+    echo " [-!!-] Waiting, got: $status"
+    sleep 1
+done
 
 # Step 4: API / curl tests
 echo ""
