@@ -1,5 +1,5 @@
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
     AppointmentKind,
     UserContext,
@@ -10,28 +10,37 @@ import {
     type Uuid
 } from "../userContext";
 
+const STORAGE_JWT_KEY = "poda_auth_jwt";
+const STORAGE_USER_KEY = "poda_auth_user";
 
 export function UserProvider(prop: { children: ReactNode }) {
-    const u = sessionStorage.getItem("user")
+    const [user, setUser] = useState<User | null>(null);
+    const [jwt, setJwt] = useState<string | null>(null);
 
-    const [user, setUser] = useState<User | null>(
-        u ? JSON.parse(u) : null
-    );
-    const j = sessionStorage.getItem("jwt")
-    const [jwt, setJwt] = useState<string | null>(j);
+    useEffect(() => {
+        const storedJwt = sessionStorage.getItem(STORAGE_JWT_KEY);
+        const storedUser = sessionStorage.getItem(STORAGE_USER_KEY);
+
+        if (storedJwt && storedUser) {
+            try {
+                setJwt(storedJwt);
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                sessionStorage.removeItem(STORAGE_JWT_KEY);
+                sessionStorage.removeItem(STORAGE_USER_KEY);
+            }
+        }
+    }, []);
 
     async function connect(email: string, password: string): Promise<boolean> {
-
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("/api/v1/users/login",
+        const res = await fetch(
+            location.origin + "/api/v1/users/login",
             {
                 method: "POST",
-                body: JSON.stringify({
-                    "email": email,
-                    "password": password,
-                }),
+                body: JSON.stringify({ "email": email, "password": password }),
                 headers: reqHeaders,
             }
         );
@@ -39,33 +48,44 @@ export function UserProvider(prop: { children: ReactNode }) {
         if (res.status >= 300) return false;
 
         const data = await res.json();
-        const headers = res.headers;
-        const auth = headers.get("Authorization");
+        const token = "Bearer " + data.token;
+        setJwt(token);
+        sessionStorage.setItem(STORAGE_JWT_KEY, token);
 
-        if (auth) sessionStorage.setItem("jwt", auth);
-        setJwt(auth);
+        // Fetch full profile since login only returns the token
+        const profileHeaders = new Headers();
+        profileHeaders.append("Authorization", token);
+        const profileRes = await fetch(
+            location.origin + "/api/v1/profile/",
+            { method: "GET", headers: profileHeaders }
+        );
 
-        const tempUser = {
-            email    : email as string,
-            kind     : data.kind as UserKind,
-            uuid     : data.id as number,
-            fname    : data.fname as string,
-            lname    : data.lname as string,
-            phone    : data.phone as string,
-            birthday : new Date(data.birthday),
-            address  : data.address as string,
-        } as AuthUser
+        if (profileRes.status >= 300) return false;
 
-        setUser(tempUser);
+        const profile = await profileRes.json();
+        const authUser = {
+            email    : profile.email as string,
+            kind     : profile.kind as UserKind,
+            uuid     : profile.id as string,
+            fname    : profile.fname as string,
+            lname    : profile.lname as string,
+            phone    : profile.phone as string,
+            birthday : new Date(profile.birthday),
+            address  : profile.address as string,
+            appointments: profile.appointments ?? [],
+        } as AuthUser;
 
-        sessionStorage.setItem("user", JSON.stringify(user));
+        setUser(authUser);
+        sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(authUser));
+
         return true;
-
     }
 
     async function disconnect() {
         setUser(null);
-        sessionStorage.clean();
+        setJwt(null);
+        sessionStorage.removeItem(STORAGE_JWT_KEY);
+        sessionStorage.removeItem(STORAGE_USER_KEY);
     }
 
     async function changeContact(email: string, phone? : string): Promise<boolean> {
@@ -85,7 +105,9 @@ export function UserProvider(prop: { children: ReactNode }) {
         );
         if (res.status >= 300) return false;
 
-        setUser({...user, phone: phone} as AuthUser);
+        const updatedUser = {...user, email: email, phone: phone ?? user!.phone} as AuthUser;
+        setUser(updatedUser);
+        sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(updatedUser));
 
         return true;
     }
@@ -103,19 +125,21 @@ export function UserProvider(prop: { children: ReactNode }) {
                     uuid: user!.uuid,
                     fname:fname,
                     lname:lname,
-                    birthday: birthday.toString().split("T")[0],
+                    birthday: birthday.toISOString().split("T")[0],
                 }),
                 headers: reqHeaders,
             }
         );
         if (res.status >= 300) return false;
 
-        setUser({
+        const updatedUser = {
             ...user,
             fname: fname,
             lname: lname,
             birthday: birthday
-        } as AuthUser);
+        } as AuthUser;
+        setUser(updatedUser);
+        sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(updatedUser));
 
         return true;
     }
@@ -140,7 +164,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         return true;
     }
 
-    async function createAccount (
+    async function createAccount(
         fname: string, lname: string,
         email: string, password: string,
         birthday: Date, phone: string, address: string | null,
@@ -148,96 +172,127 @@ export function UserProvider(prop: { children: ReactNode }) {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("/api/v1/users/signup", {
+        const res = await fetch(
+            location.origin + "/api/v1/users/signup", {
                 method: "POST",
                 body: JSON.stringify({
-                    fname:fname,
-                    lname:lname,
-                    email: email,
-                    phone: phone,
-                    password: password,
-                    address: address,
-                    birthday: birthday.toString().split("T")[0],
+                    fname, lname, email, phone, password, address,
+                    birthday: birthday.toISOString().split("T")[0],
                 }),
                 headers: reqHeaders,
             }
         );
         if (res.status >= 300) return false;
 
-        const headers = res.headers;
-        const auth = headers.get("Authorization");
+        // Auto-login after signup
+        const loginHeaders = new Headers();
+        loginHeaders.append("Content-Type", "application/json");
+        const loginRes = await fetch(
+            location.origin + "/api/v1/users/login",
+            {
+                method: "POST",
+                body: JSON.stringify({ "email": email, "password": password }),
+                headers: loginHeaders,
+            }
+        );
 
-        if (auth) sessionStorage.setItem("jwt", auth);
-        setJwt(auth);
+        if (loginRes.status < 300) {
+            const loginData = await loginRes.json();
+            const token = "Bearer " + loginData.token;
+            setJwt(token);
+            sessionStorage.setItem(STORAGE_JWT_KEY, token);
 
-        const resp = await res.json() as AuthUser;
+            // Fetch profile
+            const profileHeaders = new Headers();
+            profileHeaders.append("Authorization", token);
+            const profileRes = await fetch(
+                location.origin + "/api/v1/profile/",
+                { method: "GET", headers: profileHeaders }
+            );
 
-        setUser(resp as AuthUser);
-        sessionStorage.setItem("user", JSON.stringify(resp));
+            if (profileRes.status < 300) {
+                const profile = await profileRes.json();
+                const authUser = {
+                    email    : profile.email as string,
+                    kind     : profile.kind as UserKind,
+                    uuid     : profile.id as string,
+                    fname    : profile.fname as string,
+                    lname    : profile.lname as string,
+                    phone    : profile.phone as string,
+                    birthday : new Date(profile.birthday),
+                    address  : profile.address as string,
+                    appointments: profile.appointments ?? [],
+                } as AuthUser;
+                setUser(authUser);
+                sessionStorage.setItem(STORAGE_USER_KEY, JSON.stringify(authUser));
+            }
+        }
 
         return true;
     }
 
     async function createAppointment(
-uuid: Uuid, kind: AppointmentKind, datetime: Date
+        _uuid: Uuid, kind: AppointmentKind, datetime: Date
     ): Promise<boolean> {
         const reqHeaders = new Headers();
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch("/api/v1/users/changepassword", {
+        const res = await fetch(
+            location.origin + "/api/v1/profile/appointments/", {
                 method: "POST",
                 body: JSON.stringify({
-                    uuid: uuid,
                     kind: kind,
-                    datetime: datetime,
+                    datetime: datetime.toISOString(),
                 }),
                 headers: reqHeaders,
             }
         );
-        if (res.status >= 300) return false;
-
-        return true;
+        return res.status < 300;
     }
 
-    async function deleteAppointment(uuid: Uuid, id: number): Promise<boolean> {
+    async function deleteAppointment(_uuid: Uuid, id: number): Promise<boolean> {
         const reqHeaders = new Headers();
-        reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch("/api/v1/users/changepassword", {
+        const res = await fetch(
+            location.origin + `/api/v1/profile/appointments/${id}`, {
                 method: "DELETE",
-                body: JSON.stringify({
-                    uuid: uuid,
-                    id: id,
-                }),
                 headers: reqHeaders,
             }
         );
-        if (res.status >= 300) return false;
-
-        return true;
+        return res.status < 300;
     }
 
-    async function viewAppointment(uuid: Uuid, datetime: Date): Promise<AppointmentView[]> {
+    async function viewAppointment(_uuid: Uuid, _datetime: Date): Promise<AppointmentView[]> {
         const reqHeaders = new Headers();
-        reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch("/api/v1/users/viewappointment", {
-                method: "POST",
-                body: JSON.stringify({
-                    uuid: uuid,
-                    datetime: datetime,
-                }),
+        const res = await fetch(
+            location.origin + "/api/v1/profile/appointments/", {
+                method: "GET",
                 headers: reqHeaders,
             }
         );
         if (res.status >= 300) return [];
 
-        const resp = res.json() as Promise<AppointmentView[]>;
+        const appointments = await res.json() as {
+            id: number;
+            user_id?: string;
+            datetime: string;
+            kind: string;
+        }[];
 
-        return resp;
+        return appointments.map(a => ({
+            userUuid: a.user_id ?? user!.uuid,
+            fname: user!.fname,
+            lname: user!.lname,
+            appointment: {
+                id: a.id,
+                datetime: new Date(a.datetime),
+                kind: a.kind as AppointmentKind,
+            },
+        }));
     }
 
     return(

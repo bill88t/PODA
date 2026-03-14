@@ -44,6 +44,16 @@ $input-text-color-dark: $white
 $link-text-color-dark: $highlight-white
 $nav-background-color-dark: $primary
 
+:root
+  color-scheme: light dark
+  --background-color: #{$background-color}
+  --text-color: #{$text-color}
+  --input-bg: #{$input-background-color}
+  --input-text: #{$input-text-color}
+  --button-bg: #{$button-background-color}
+  --link-color: #{$link-text-color}
+  --nav-bg: #{$nav-background-color}
+
 .error
   color: $red
 
@@ -54,70 +64,73 @@ $nav-background-color-dark: $primary
   box-sizing: border-box
   line-height: 1.5em // 1 + 1/2 of the font size
 h1
-  color: $text-color
+  color: var(--text-color, #{$text-color})
   padding: math.div($gap, 2) $gap
-  size: $title-size
+  font-size: $title-size
 
 p
-  color: $text-color
-  size: $text-size
+  color: var(--text-color, #{$text-color})
+  font-size: $text-size
 
 a
-  color: $link-text-color
+  color: var(--link-color, #{$link-text-color})
 
 body
-  background-color: $background-color
+  background-color: var(--background-color, #{$background-color})
   width: 100%
   height: 100%
   max-width: 1920px
   display: flex
   justify-content: center
-  align-items: below
+  align-items: flex-start
 
 .form
-  color: $text-color
+  color: var(--text-color, #{$text-color})
   padding: $form-gap
   width: 100%
   max-width: 480px
   height: 100%
-  max-height: $text-size*3
+  max-height: none
   margin: auto
   gap: $form-gap
   display: grid
   grid-template-columns: 1fr
 
   *
-    background-color: transparent
     width: 100%
 
   input, button, .field select
     border-style: none
     box-shadow: rgba($shadow-color, 0.2) 0 0 12px
     padding: $form-gap
-    transform: translateY(math.div(-$form-gap, 2))
     border-radius: 4px
+    background-color: var(--input-bg, #{$input-background-color}) !important
+    color: var(--input-text, #{$input-text-color}) !important
+    -moz-appearance: none
+    appearance: none
 
   button
     background-color: $button-background-color
     color: $button-text-color
     margin-top: math.div($form-gap, 2) // alignment
 
-  input
-    :-moz-autofill,
-    :-moz-autofill-preview,
-    :-webkit-autofill
-      color: $input-text-color
-      background-color: $input-background-color
+  input:-moz-autofill,
+  input:-moz-autofill-preview,
+  input:-webkit-autofill
+    -webkit-text-fill-color: $input-text-color !important
+    color: $input-text-color !important
+    box-shadow: 0 0 0 30px var(--input-bg, #{$input-background-color}) inset !important
+    background-clip: padding-box
 
 
 
   h1, h2
     padding: $form-gap 0
-    size: $title-size
+    font-size: $title-size
 
 .nav
   width: 100vw
-  background-color: $nav-background-color
+  background-color: var(--nav-bg, #{$nav-background-color})
   color: $nav-text-color
   display: flex
   padding: $nav-padding*2 $nav-padding
@@ -125,7 +138,6 @@ body
   column-gap: $nav-gap
 
   *
-    background-color: inherit
     display: flex
 
 
@@ -140,24 +152,33 @@ body
     text-decoration: none
 
 @media (prefers-color-scheme: dark)
+  :root
+    --background-color: #{$background-color-dark}
+    --text-color: #{$text-color-dark}
+    --input-bg: #{$input-background-color-dark}
+    --input-text: #{$input-text-color-dark}
+    --button-bg: #{$button-background-color-dark}
+    --link-color: #{$link-text-color-dark}
+    --nav-bg: #{$nav-background-color-dark}
+
   body
-    background-color: $background-color-dark
+    background-color: var(--background-color, #{$background-color-dark})
 
   h1, p
-    color: $text-color-dark
+    color: var(--text-color, #{$text-color-dark})
 
   a
-    color: $link-text-color-dark
+    color: var(--link-color, #{$link-text-color-dark})
 
   .form
-    color: $text-color-dark
+    color: var(--text-color, #{$text-color-dark})
 
     input
-      color: $input-text-color-dark
-      background-color: $input-background-color-dark
+      color: var(--input-text, #{$input-text-color-dark})
+      background-color: var(--input-bg, #{$input-background-color-dark})
 
     button
-      background-color: $button-background-color-dark
+      background-color: var(--button-bg, #{$button-background-color-dark})
       color: $button-text-color-dark
 
     input, button
@@ -165,7 +186,7 @@ body
       box-shadow: rgba($shadow-color-dark, 0.3) 0 0 12px
 
   .nav
-    background-color: $nav-background-color-dark
+    background-color: var(--nav-bg, #{$nav-background-color-dark})
 
 @media(min-width: 480px)
   .form
