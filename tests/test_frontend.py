@@ -28,13 +28,13 @@ BASE_URL = "http://localhost:5173"
 def navigate(page: Page, path: str) -> None:
     """Navigate to a page and wait for the app to settle."""
     page.goto(BASE_URL + path)
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state()
 
 
 def nav_click(page: Page, text: str) -> None:
     """Click a nav-bar link by visible text."""
     page.locator(".nav").get_by_text(text).click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state()
 
 
 def login(page: Page, email: str, password: str) -> None:
@@ -43,7 +43,7 @@ def login(page: Page, email: str, password: str) -> None:
     page.get_by_text("Email").locator("+ *").fill(email)
     page.get_by_text("Password").locator("+ *").fill(password)
     page.get_by_role("button", name="Login").click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state()
 
 
 def login_via_form(page: Page, email: str, password: str) -> None:
@@ -51,7 +51,7 @@ def login_via_form(page: Page, email: str, password: str) -> None:
     page.locator('input[type="text"]').fill(email)
     page.locator('input[type="password"]').fill(password)
     page.get_by_role("button", name="Login").click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_load_state()
 
 
 # ─── 1. Registration ─────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ class TestRegistration:
         page.locator('input[type="text"]').nth(4).fill("123 Test St")  # Address
         page.locator('input[type="date"]').fill("1995-06-15")  # Birthday
         page.get_by_role("button", name="Sign Up").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
         # On success the SPA navigates to "/"
         expect(page).to_have_url(BASE_URL + "/")
 
@@ -88,7 +88,7 @@ class TestRegistration:
         page.locator('input[type="text"]').nth(4).fill("123 Test St")
         page.locator('input[type="date"]').fill("1995-06-15")
         page.get_by_role("button", name="Sign Up").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
         expect(page.locator(".error")).to_be_visible()
 
     def test_register_password_mismatch_shows_error(self, page: Page):
@@ -129,7 +129,7 @@ class TestAuth:
         login_via_form(page, "playwright@test.example", "testpass123")
         expect(page.locator(".nav")).to_contain_text("Log out")
         page.locator(".nav").get_by_text("Log out").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
         expect(page.locator(".nav")).to_contain_text("Login")
 
     def test_login_bill_existing_user(self, page: Page):
@@ -154,7 +154,7 @@ class TestAppointments:
         """Log in as the playwright test user before each test in this class."""
         navigate(page, "/login")
         login_via_form(page, "playwright@test.example", "testpass123")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
         expect(page.locator(".nav")).to_contain_text("Log out")
 
     def test_events_page_accessible(self, page: Page):
@@ -171,12 +171,12 @@ class TestAppointments:
         page.locator("#appointment-kind").select_option("haircut")
         page.locator('input[type="datetime-local"]').fill("2027-06-01T10:00")
         page.get_by_role("button", name="New Appointment").click()
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
 
     def test_appointment_list_not_empty_after_create(self, page: Page):
         """After creating an appointment, the events list has at least one entry."""
         nav_click(page, "Events")
-        page.wait_for_load_state("networkidle")
+        page.wait_for_load_state()
         delete_links = page.locator("a", has_text="Delete")
         count_before = delete_links.count()
         assert (
@@ -186,12 +186,12 @@ class TestAppointments:
     # def test_delete_appointment(self, page: Page):
     #     """User can delete their own appointment."""
     #     nav_click(page, "Events")
-    #     page.wait_for_load_state("networkidle")
+    #     page.wait_for_load_state()
     #     delete_links = page.locator("a", has_text="Delete")
     #     count_before = delete_links.count()
     #     assert count_before > 0, "Expected at least one appointment to delete"
     #     delete_links.first.click()
-    #     page.wait_for_load_state("networkidle")
+    #     page.wait_for_load_state()
     #     time.sleep(0.3)
     #     count_after = page.locator("a", has_text="Delete").count()
     #     assert count_after == count_before - 1
@@ -205,7 +205,7 @@ class TestAppointments:
 #     def logged_in(self, page: Page):
 #         navigate(page, "/login")
 #         login_via_form(page, "playwright@test.example", "testpass123")
-#         page.wait_for_load_state("networkidle")
+#         page.wait_for_load_state()
 
 #     def _go_profile(self, page: Page) -> None:
 #         nav_click(page, "Profile")
@@ -224,7 +224,7 @@ class TestAppointments:
 #         fname_input = page.locator('input[type="text"]').nth(0)
 #         fname_input.fill("PlayUpdated")
 #         page.get_by_role("button", name="Confirm Information Changes").click()
-#         page.wait_for_load_state("networkidle")
+#         page.wait_for_load_state()
 #         # Confirm the form collapsed (edit mode exited) without an error
 #         expect(page.locator(".error")).to_have_count(0)
 #         expect(page.locator(".form")).to_contain_text("PlayUpdated")
@@ -236,7 +236,7 @@ class TestAppointments:
 #         email_input = page.locator('input[type="text"]').first
 #         email_input.fill("playwright@test.example")  # keep same email
 #         page.get_by_role("button", name="Confirm Contact changes").click()
-#         page.wait_for_load_state("networkidle")
+#         page.wait_for_load_state()
 #         expect(page.locator(".error")).to_have_count(0)
 
 #     def test_change_password(self, page: Page):
@@ -246,12 +246,12 @@ class TestAppointments:
 #         page.locator('input[type="password"]').nth(0).fill("newpass456")
 #         page.locator('input[type="password"]').nth(1).fill("newpass456")
 #         page.get_by_role("button", name="Confirm Password Change").click()
-#         page.wait_for_load_state("networkidle")
+#         page.wait_for_load_state()
 #         expect(page.locator(".error")).to_have_count(0)
 
 #         # Log out and back in with the new password
 #         page.locator(".nav").get_by_text("Log out").click()
-#         page.wait_for_load_state("networkidle")
+#         page.wait_for_load_state()
 #         navigate(page, "/login")
 #         login_via_form(page, "playwright@test.example", "newpass456")
 #         expect(page.locator(".nav")).to_contain_text("Log out")
