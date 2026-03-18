@@ -243,7 +243,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                 method: "POST",
                 body: JSON.stringify({
                     kind: kind,
-                    datetime: datetime.toISOString(),
+                    datetime: datetime.toString(),
                 }),
                 headers: reqHeaders,
             }
