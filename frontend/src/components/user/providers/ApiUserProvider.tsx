@@ -239,7 +239,7 @@ export function UserProvider(prop: { children: ReactNode }) {
         reqHeaders.append("Authorization", jwt as string);
 
         const res = await fetch(
-            location.origin + "/api/v1/profile/appointments/", {
+            "/api/v1/profile/appointments/", {
                 method: "POST",
                 body: JSON.stringify({
                     kind: kind,
