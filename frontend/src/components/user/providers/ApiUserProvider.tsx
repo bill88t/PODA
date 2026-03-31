@@ -24,8 +24,7 @@ export function UserProvider(prop: { children: ReactNode }) {
                 setJwt(storedJwt);
                 setUser(JSON.parse(storedUser));
             } catch (e) {
-                sessionStorage.removeItem(STORAGE_JWT_KEY);
-                sessionStorage.removeItem(STORAGE_USER_KEY);
+                sessionStorage.clear();
             }
         }
     }, []);
