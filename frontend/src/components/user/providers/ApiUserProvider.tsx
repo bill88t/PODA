@@ -1,5 +1,5 @@
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
     AppointmentKind,
     UserContext,
@@ -12,13 +12,23 @@ import {
 
 
 export function UserProvider(prop: { children: ReactNode }) {
-    const u = sessionStorage.getItem("user")
+    const [user, setUser] = useState<User | null>(null);
+    const [jwt, setJwt] = useState<string | null>(null);
 
-    const [user, setUser] = useState<User | null>(
-        u ? JSON.parse(u) : null
-    );
-    const j = sessionStorage.getItem("jwt")
-    const [jwt, setJwt] = useState<string | null>(j);
+    useEffect(() => {
+        const storedJwt = sessionStorage.getItem("jwt");
+        const storedUser = sessionStorage.getItem("user");
+
+        if (storedJwt && storedUser) {
+            try {
+                setJwt(storedJwt);
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                sessionStorage.removeItem(STORAGE_JWT_KEY);
+                sessionStorage.removeItem(STORAGE_USER_KEY);
+            }
+        }
+    }, []);
 
     async function connect(email: string, password: string): Promise<boolean> {
 
@@ -45,20 +55,36 @@ export function UserProvider(prop: { children: ReactNode }) {
         if (auth) sessionStorage.setItem("jwt", auth);
         setJwt(auth);
 
-        const tempUser = {
-            email    : email as string,
-            kind     : data.kind as UserKind,
-            uuid     : data.id as number,
-            fname    : data.fname as string,
-            lname    : data.lname as string,
-            phone    : data.phone as string,
-            birthday : new Date(data.birthday),
-            address  : data.address as string,
-        } as AuthUser
+        const token = "Bearer " + data.token;
+        setJwt(token);
+        sessionStorage.setItem("jwt", token);
 
-        setUser(tempUser);
+        // Fetch full profile since login only returns the token
+        const profileHeaders = new Headers();
+        profileHeaders.append("Authorization", token);
+        const profileRes = await fetch(
+            location.origin + "/api/v1/profile/",
+            { method: "GET", headers: profileHeaders }
+        );
 
-        sessionStorage.setItem("user", JSON.stringify(user));
+        if (profileRes.status >= 300) return false;
+
+        const profile = await profileRes.json();
+        const authUser = {
+            email    : profile.email as string,
+            kind     : profile.kind as UserKind,
+            uuid     : profile.id as string,
+            fname    : profile.fname as string,
+            lname    : profile.lname as string,
+            phone    : profile.phone as string,
+            birthday : new Date(profile.birthday),
+            address  : profile.address as string,
+            appointments: profile.appointments ?? [],
+        } as AuthUser;
+
+        setUser(authUser);
+        sessionStorage.setItem("user", JSON.stringify(authUser));
+
         return true;
 
     }
@@ -66,6 +92,7 @@ export function UserProvider(prop: { children: ReactNode }) {
     async function disconnect() {
         setUser(null);
         sessionStorage.clean();
+        setJwt(null);
     }
 
     async function changeContact(email: string, phone? : string): Promise<boolean> {
@@ -174,6 +201,49 @@ export function UserProvider(prop: { children: ReactNode }) {
 
         setUser(resp as AuthUser);
         sessionStorage.setItem("user", JSON.stringify(resp));
+        // Auto-login after signup
+        const loginHeaders = new Headers();
+        loginHeaders.append("Content-Type", "application/json");
+        const loginRes = await fetch(
+            location.origin + "/api/v1/users/login",
+            {
+                method: "POST",
+                body: JSON.stringify({ "email": email, "password": password }),
+                headers: loginHeaders,
+            }
+        );
+
+        if (loginRes.status < 300) {
+            const loginData = await loginRes.json();
+            const token = "Bearer " + loginData.token;
+            setJwt(token);
+            sessionStorage.setItem("jwt", token);
+
+            // Fetch profile
+            const profileHeaders = new Headers();
+            profileHeaders.append("Authorization", token);
+            const profileRes = await fetch(
+                location.origin + "/api/v1/profile/",
+                { method: "GET", headers: profileHeaders }
+            );
+
+            if (profileRes.status < 300) {
+                const profile = await profileRes.json();
+                const authUser = {
+                    email    : profile.email as string,
+                    kind     : profile.kind as UserKind,
+                    uuid     : profile.id as string,
+                    fname    : profile.fname as string,
+                    lname    : profile.lname as string,
+                    phone    : profile.phone as string,
+                    birthday : new Date(profile.birthday),
+                    address  : profile.address as string,
+                    appointments: profile.appointments ?? [],
+                } as AuthUser;
+                setUser(authUser);
+                sessionStorage.setItem("user", JSON.stringify(authUser));
+            }
+        }
 
         return true;
     }
@@ -185,7 +255,8 @@ uuid: Uuid, kind: AppointmentKind, datetime: Date
         reqHeaders.append("Content-Type", "application/json");
         reqHeaders.append("Authorization", jwt as string);
 
-        const res = await fetch("/api/v1/users/changepassword", {
+        const res = await fetch(
+            "/api/v1/profile/appointments/", {
                 method: "POST",
                 body: JSON.stringify({
                     uuid: uuid,
