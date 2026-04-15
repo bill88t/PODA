@@ -5,11 +5,16 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
     plugins: [react()],
     build: {
-        minify: 'esbuild',
         rollupOptions: {
             output: {
                 chunkFileNames: 'assets/[name]-[hash].js',
+                manualChunks: {
+                    "react-vendors": ["react", "react-dom"],
+                }
             },
         },
+    },
+    optimizeDeps: {
+        include: ["react", "reaxt-dom"],
     },
 })

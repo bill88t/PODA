@@ -23,6 +23,7 @@ export function UserProvider(prop: { children: ReactNode }) {
             try {
                 setJwt(storedJwt);
                 setUser(JSON.parse(storedUser));
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
                 sessionStorage.clear();
             }
